@@ -117,7 +117,7 @@ private:
 
         SHELLEXECUTEINFOW sei{ sizeof(sei) };
         sei.fMask = { SEE_MASK_NOCLOSEPROCESS | SEE_MASK_FLAG_NO_UI };
-        sei.lpFile = L"modules\\ColorPicker\\PowerToys.ColorPickerUI.exe";
+        sei.lpFile = L"PowerToys.ColorPickerUI.exe";
         sei.nShow = SW_SHOWNORMAL;
         sei.lpParameters = executable_args.data();
         if (ShellExecuteExW(&sei))
@@ -239,6 +239,7 @@ public:
         ResetEvent(m_hInvokeEvent);
         launch_process();
         m_enabled = true;
+        Trace::EnableColorPicker(true);
     };
 
     virtual void disable()
@@ -252,6 +253,7 @@ public:
         }
 
         m_enabled = false;
+        Trace::EnableColorPicker(false);
     }
 
     virtual bool on_hotkey(size_t /*hotkeyId*/) override

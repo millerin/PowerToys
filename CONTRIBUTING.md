@@ -31,7 +31,11 @@ Upvote the original issue by clicking its [+😊] button and hitting 👍 (+1) i
 
 ## Contributing fixes / features
 
-Please comment on an issue to let us know you're interested in working on something before you start the work. Not only does this avoid multiple people unexpectedly working on the same thing at the same time but it enables us to make sure everyone is clear on what should be done to implement any new functionality. It's less work for everyone, in the long run, to establish this up front.
+Please comment on [our "Would you like to contribute to PowerToys?" thread](https://github.com/microsoft/PowerToys/issues/28769) to let us know you're interested in working on something before you start the work. Not only does this avoid multiple people unexpectedly working on the same thing at the same time but it enables us to make sure everyone is clear on what should be done to implement any new functionality. It's less work for everyone, in the long run, to establish this up front.
+
+### Localization issues
+
+Please file localization issues, so our internal localization team can identify and fix them. However we currently don't accept community Pull Requests fixing localization issues. Localization is handled by the internal Microsoft team only.
 
 ### To Spec or not to Spec
 
@@ -53,7 +57,7 @@ Follow the [development guidelines](https://github.com/microsoft/PowerToys/blob/
 
 ### Naming of features and functionality
 
-Naming should be descriptive and straight forward.  We want names to be clear about functionality and usefulness moving forward. 
+Naming should be descriptive and straight forward. We want names to be clear about functionality and usefulness moving forward. 
 
 ### How can I become a collaborator on the PowerToys team
 

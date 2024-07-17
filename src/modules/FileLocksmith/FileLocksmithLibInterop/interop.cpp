@@ -2,7 +2,7 @@
 
 #include "FileLocksmith.h"
 
-#include "../FileLocksmithExt/Constants.h"
+#include "../FileLocksmithLib/Constants.h"
 
 namespace FileLocksmith::Interop
 {
@@ -151,7 +151,7 @@ namespace FileLocksmith::Interop
 
             if (!stream)
             {
-                return false;    
+                return false;
             }
 
             stream.close();
@@ -178,7 +178,7 @@ namespace FileLocksmith::Interop
             return false;
         }
 
-        /* Adapted from "https://learn.microsoft.com/en-us/windows/win32/secauthz/enabling-and-disabling-privileges-in-c--" */
+        /* Adapted from "https://learn.microsoft.com/windows/win32/secauthz/enabling-and-disabling-privileges-in-c--" */
         static System::Boolean SetDebugPrivilege()
         {
             HANDLE hToken;

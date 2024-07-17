@@ -82,9 +82,9 @@ private:
         {
             Logger::info("MeasureTool is going to use default shortcut");
             m_hotkey.win = true;
+            m_hotkey.ctrl = true;
             m_hotkey.alt = false;
             m_hotkey.shift = true;
-            m_hotkey.ctrl = false;
             m_hotkey.key = 'M';
         }
     }
@@ -104,7 +104,7 @@ private:
 
         SHELLEXECUTEINFOW sei{ sizeof(sei) };
         sei.fMask = { SEE_MASK_NOCLOSEPROCESS | SEE_MASK_FLAG_NO_UI };
-        sei.lpFile = L"modules\\MeasureTool\\PowerToys.MeasureToolUI.exe";
+        sei.lpFile = L"WinUI3Apps\\PowerToys.MeasureToolUI.exe";
         sei.nShow = SW_SHOWNORMAL;
         sei.lpParameters = executable_args.data();
         if (ShellExecuteExW(&sei))

@@ -27,6 +27,10 @@ struct LogSettings
     inline const static std::wstring pdfPrevLogPath = L"logs\\FileExplorer_localLow\\PdfPrevHandler\\pdf-prev-handler-log.txt";
     inline const static std::string pdfThumbLoggerName = "PdfThumbnailProvider";
     inline const static std::wstring pdfThumbLogPath = L"logs\\FileExplorer_localLow\\PdfThumbnailProvider\\pdf-thumbnail-provider-log.txt";
+    inline const static std::string qoiPrevLoggerName = "QoiPrevHandler";
+    inline const static std::wstring qoiPrevLogPath = L"logs\\FileExplorer_localLow\\QoiPreviewHandler\\qoi-prev-handler-log.txt";
+    inline const static std::string qoiThumbLoggerName = "QoiThumbnailProvider";
+    inline const static std::wstring qoiThumbLogPath = L"logs\\FileExplorer_localLow\\QoiThumbnailProvider\\qoi-thumbnail-provider-log.txt";
     inline const static std::string stlThumbLoggerName = "StlThumbnailProvider";
     inline const static std::wstring stlThumbLogPath = L"logs\\FileExplorer_localLow\\StlThumbnailProvider\\stl-thumbnail-provider-log.txt";
     inline const static std::string svgPrevLoggerName = "SvgPrevHandler";
@@ -35,6 +39,8 @@ struct LogSettings
     inline const static std::wstring svgThumbLogPath = L"logs\\FileExplorer_localLow\\SvgThumbnailProvider\\svg-thumbnail-provider-log.txt";
     inline const static std::string launcherLoggerName = "launcher";
     inline const static std::wstring launcherLogPath = L"LogsModuleInterface\\launcher-log.txt";
+    inline const static std::string mouseWithoutBordersLoggerName = "mouseWithoutBorders";
+    inline const static std::wstring mouseWithoutBordersLogPath = L"LogsModuleInterface\\mouseWithoutBorders-log.txt";
     inline const static std::wstring awakeLogPath = L"Logs\\awake-log.txt";
     inline const static std::wstring powerAccentLogPath = L"quick-accent-log.txt";
     inline const static std::string fancyZonesLoggerName = "fancyzones";
@@ -47,6 +53,7 @@ struct LogSettings
     inline const static std::wstring keyboardManagerLogPath = L"Logs\\keyboard-manager-log.txt";
     inline const static std::string findMyMouseLoggerName = "find-my-mouse";
     inline const static std::string mouseHighlighterLoggerName = "mouse-highlighter";
+    inline const static std::string mouseJumpLoggerName = "mouse-jump";
     inline const static std::string mousePointerCrosshairsLoggerName = "mouse-pointer-crosshairs";
     inline const static std::string imageResizerLoggerName = "imageresizer";
     inline const static std::string powerRenameLoggerName = "powerrename";
@@ -56,6 +63,12 @@ struct LogSettings
     inline const static std::wstring alwaysOnTopLogPath = L"always-on-top-log.txt";
     inline const static std::string hostsLoggerName = "hosts";
     inline const static std::wstring hostsLogPath = L"Logs\\hosts-log.txt";
+    inline const static std::string registryPreviewLoggerName = "registrypreview";
+    inline const static std::string cropAndLockLoggerName = "crop-and-lock";
+    inline const static std::wstring registryPreviewLogPath = L"Logs\\registryPreview-log.txt";
+    inline const static std::string environmentVariablesLoggerName = "environment-variables";
+    inline const static std::wstring cmdNotFoundLogPath = L"Logs\\cmd-not-found-log.txt";
+    inline const static std::string cmdNotFoundLoggerName = "cmd-not-found";
     inline const static int retention = 30;
     std::wstring logLevel;
     LogSettings();

@@ -1,27 +1,29 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWindowsForms>true</UseWindowsForms>
     <AssemblyTitle>PowerToys.MarkdownPreviewHandler</AssemblyTitle>
     <AssemblyDescription>PowerToys MarkdownPreviewHandler</AssemblyDescription>
     <Description>PowerToys MarkdownPreviewHandler</Description>
-    <DocumentationFile>$(SolutionDir)$(Platform)\$(Configuration)\modules\FileExplorerPreview\MarkdownPreviewPaneDocumentation.xml</DocumentationFile>
-    <OutputPath>..\..\..\..\$(Platform)\$(Configuration)\modules\FileExplorerPreview\</OutputPath>
+    <DocumentationFile>..\..\..\..\$(Platform)\$(Configuration)\MarkdownPreviewPaneDocumentation.xml</DocumentationFile>
+    <OutputPath>..\..\..\..\$(Platform)\$(Configuration)</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <GenerateSatelliteAssembliesForCore>true</GenerateSatelliteAssembliesForCore>
-    <RuntimeIdentifiers>win10-x64;win10-arm64</RuntimeIdentifiers>
-    <TargetFramework>net7.0-windows10.0.19041.0</TargetFramework>
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+    <TargetFramework>net8.0-windows10.0.20348.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
     <SelfContained>true</SelfContained>
   </PropertyGroup>
 
   <!-- SelfContained=true requires RuntimeIdentifier to be set -->
   <PropertyGroup Condition="'$(Platform)'=='x64'">
-    <RuntimeIdentifier>win10-x64</RuntimeIdentifier>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Platform)'=='ARM64'">
-    <RuntimeIdentifier>win10-arm64</RuntimeIdentifier>
+    <RuntimeIdentifier>win-arm64</RuntimeIdentifier>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -59,13 +61,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Markdig.Signed" />
     <PackageReference Include="Microsoft.Web.WebView2" />
     <PackageReference Include="Microsoft.Windows.CsWinRT" />
     <PackageReference Include="System.IO.Abstractions" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\common\FilePreviewCommon\FilePreviewCommon.csproj" />
     <ProjectReference Include="..\..\..\common\GPOWrapper\GPOWrapper.vcxproj" />
     <ProjectReference Include="..\..\..\common\Common.UI\Common.UI.csproj" />
     <ProjectReference Include="..\..\..\common\interop\PowerToys.Interop.vcxproj" />

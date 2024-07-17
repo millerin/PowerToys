@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using interop;
 using ManagedCommon;
-using PowerAccent.Core.Tools;
 
 namespace PowerAccent.UI;
 
@@ -22,6 +21,8 @@ internal static class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        Logger.InitializeLogger("\\QuickAccent\\Logs");
+
         if (PowerToys.GPOWrapper.GPOWrapper.GetConfiguredQuickAccentEnabledValue() == PowerToys.GPOWrapper.GpoRuleConfigured.Disabled)
         {
             Logger.LogWarning("Tried to start with a GPO policy setting the utility to always be disabled. Please contact your systems administrator.");

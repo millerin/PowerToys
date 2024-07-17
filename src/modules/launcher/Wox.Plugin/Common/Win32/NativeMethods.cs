@@ -16,7 +16,7 @@ namespace Wox.Plugin.Common.Win32
     public static class NativeMethods
     {
         [DllImport("user32.dll", CharSet = CharSet.Unicode)]
-        public static extern int EnumWindows(EnumWindowsProc callPtr, int lPar);
+        public static extern int EnumWindows(EnumWindowsProc callPtr, IntPtr lParam);
 
         [DllImport("user32.dll", SetLastError = true)]
         public static extern IntPtr GetWindow(IntPtr hWnd, GetWindowCmd uCmd);
@@ -66,7 +66,7 @@ namespace Wox.Plugin.Common.Win32
         public static extern int DwmpActivateLivePreview([MarshalAs(UnmanagedType.Bool)] bool fActivate, IntPtr hWndExclude, IntPtr hWndInsertBefore, LivePreviewTrigger lpt, IntPtr prcFinalRect);
 
         [DllImport("dwmapi.dll", PreserveSig = false)]
-        public static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+        public static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref uint attrValue, int attrSize);
 
         [DllImport("dwmapi.dll", PreserveSig = false)]
         public static extern int DwmGetWindowAttribute(IntPtr hwnd, int dwAttribute, out int pvAttribute, int cbAttribute);
@@ -80,6 +80,9 @@ namespace Wox.Plugin.Common.Win32
 
         [DllImport("user32.dll")]
         public static extern int SendMessage(IntPtr hWnd, int msg, int wParam);
+
+        [DllImport("user32.dll")]
+        public static extern int SendMessageTimeout(IntPtr hWnd, uint msg, UIntPtr wParam, IntPtr lParam, int fuFlags, int uTimeout, out int lpdwResult);
 
         [DllImport("kernel32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -118,6 +121,9 @@ namespace Wox.Plugin.Common.Win32
 
         [DllImport("shell32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         public static extern int SHCreateItemFromParsingName([MarshalAs(UnmanagedType.LPWStr)] string path, IntPtr pbc, ref Guid riid, [MarshalAs(UnmanagedType.Interface)] out IShellItem shellItem);
+
+        [DllImport("rpcrt4.dll")]
+        public static extern int UuidCreateSequential(out GUIDDATA Uuid);
     }
 
     [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1310:Field names should not contain underscore", Justification = "These are the names used by win32.")]
@@ -143,6 +149,16 @@ namespace Wox.Plugin.Common.Win32
         /// Closes the window
         /// </summary>
         public const int SC_CLOSE = 0xF060;
+
+        /// <summary>
+        /// RPC call succeeded
+        /// </summary>
+        public const int RPC_S_OK = 0;
+
+        /// <summary>
+        /// The UUID is guaranteed to be unique to this computer only.
+        /// </summary>
+        public const int RPC_S_UUID_LOCAL_ONLY = 0x720;
     }
 
     public static class ShellItemTypeConstants
@@ -223,7 +239,7 @@ namespace Wox.Plugin.Common.Win32
         /// <summary>
         /// The operation was canceled by the user. (Error source 7 means Win32.)
         /// </summary>
-        /// <SeeAlso href="https://learn.microsoft.com/en-us/windows/win32/debug/system-error-codes--1000-1299-"/>
+        /// <SeeAlso href="https://learn.microsoft.com/windows/win32/debug/system-error-codes--1000-1299-"/>
         /// <SeeAlso href="https://en.wikipedia.org/wiki/HRESULT"/>
         E_CANCELLED = 0x800704C7,
     }
@@ -477,28 +493,28 @@ namespace Wox.Plugin.Common.Win32
     public enum DwmWindowAttributes
     {
         NCRenderingEnabled = 1,
-        NCRenderingPolicy,
-        TransitionsForceDisabled,
-        AllowNCPaint,
-        CaptionButtonBounds,
-        NonClientRtlLayout,
-        ForceIconicRepresentation,
-        Flip3DPolicy,
-        ExtendedFrameBounds,
-        HasIconicBitmap,
-        DisallowPeek,
-        ExcludedFromPeek,
-        Cloak,
-        Cloaked,
-        FreezeRepresentation,
-        PassiveUpdateMode,
-        UseHostbackdropbrush,
-        UseImmersiveDarkMode,
-        WindowCornerPreference,
-        BorderColor,
-        CaptionColor,
-        TextColor,
-        VisibleFrameBorderThickness,
+        NCRenderingPolicy = 2,
+        TransitionsForceDisabled = 3,
+        AllowNCPaint = 4,
+        CaptionButtonBounds = 5,
+        NonClientRtlLayout = 6,
+        ForceIconicRepresentation = 7,
+        Flip3DPolicy = 8,
+        ExtendedFrameBounds = 9,
+        HasIconicBitmap = 10,
+        DisallowPeek = 11,
+        ExcludedFromPeek = 12,
+        Cloak = 13,
+        Cloaked = 14,
+        FreezeRepresentation = 15,
+        PassiveUpdateMode = 16,
+        UseHostbackdropbrush = 17,
+        UseImmersiveDarkMode = 20,
+        WindowCornerPreference = 33,
+        BorderColor = 34,
+        CaptionColor = 35,
+        TextColor = 36,
+        VisibleFrameBorderThickness = 37,
         Last,
     }
 
@@ -616,6 +632,16 @@ namespace Wox.Plugin.Common.Win32
         /// All possible access rights for a process object.
         /// </summary>
         AllAccess = StandardRightsRequired | Synchronize | 0xFFFF,
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct GUIDDATA
+    {
+        public int Data1;
+        public short Data2;
+        public short Data3;
+        [System.Runtime.InteropServices.MarshalAsAttribute(System.Runtime.InteropServices.UnmanagedType.ByValArray, SizeConst = 8)]
+        public byte[] Data4;
     }
 
     /// <summary>
@@ -1054,7 +1080,7 @@ namespace Wox.Plugin.Common.Win32
         /// <summary>
         /// The window itself contains child windows that should take part in dialog box, navigation. If this
         /// style is specified, the dialog manager recurses into children of this window when performing
-        /// navigation operations such as handling tha TAB key, an arrow key, or a keyboard mnemonic.
+        /// navigation operations such as handling the TAB key, an arrow key, or a keyboard mnemonic.
         /// </summary>
         WS_EX_CONTROLPARENT = 0x10000,
 

@@ -233,7 +233,7 @@
     <value>Physical address (MAC)</value>
   </data>
   <data name="Microsoft_plugin_sys_plugin_description" xml:space="preserve">
-    <value>Executes system commands (e.g. 'shutdown', 'lock', 'sleep').</value>
+    <value>Executes system commands (e.g. 'shutdown', 'lock', 'sleep')</value>
     <comment>This should align to the actions in Windows relating to shutting down, signing out, locking, sleeping, restarting, emptying the recycle bin, and hibernating your computer. </comment>
   </data>
   <data name="Microsoft_plugin_sys_plugin_name" xml:space="preserve">
@@ -242,6 +242,18 @@
   </data>
   <data name="Microsoft_plugin_sys_RecycleBin" xml:space="preserve">
     <value>Recycle Bin</value>
+    <comment>Means the recycle bin folder in Explorer.</comment>
+  </data>
+  <data name="Microsoft_plugin_sys_RecycleBinEmptyResult" xml:space="preserve">
+    <value>Empty Recycle Bin</value>
+    <comment>This should align to the action in Windows of emptying the recycle bin on your computer.</comment>
+  </data>
+  <data name="Microsoft_plugin_sys_RecycleBinEmpty_description" xml:space="preserve">
+    <value>Empty Recycle Bin</value>
+    <comment>This should align to the action in Windows of emptying the recycle bin on your computer.</comment>
+  </data>
+  <data name="Microsoft_plugin_sys_RecycleBinOpen" xml:space="preserve">
+    <value>Open Recycle Bin</value>
     <comment>Means the recycle bin folder in Explorer.</comment>
   </data>
   <data name="Microsoft_plugin_sys_RecycleBin_contextMenu" xml:space="preserve">
@@ -270,6 +282,9 @@
   <data name="Microsoft_plugin_sys_RecycleBin_searchTag" xml:space="preserve">
     <value>Empty Recycle Bin</value>
     <comment>This should align to the action in Windows of emptying the recycle bin on your computer.</comment>
+  </data>
+  <data name="Microsoft_plugin_sys_RecycleBin_ShowEmptySeparate" xml:space="preserve">
+    <value>Show separate result for Empty Recycle Bin command</value>
   </data>
   <data name="Microsoft_plugin_sys_RecycleBin_ShowEmptySuccessMessage" xml:space="preserve">
     <value>Show a success message after emptying the Recycle Bin</value>

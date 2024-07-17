@@ -12,6 +12,7 @@
 #include <common/interop/shared_constants.h>
 #include <common/utils/logger_helper.h>
 #include <common/utils/winapi_error.h>
+#include <common/utils/package.h>
 
 BOOL APIENTRY DllMain(HMODULE /*hModule*/,
                       DWORD ul_reason_for_call,
@@ -119,7 +120,7 @@ private:
 
         SHELLEXECUTEINFOW sei{ sizeof(sei) };
         sei.fMask = { SEE_MASK_NOCLOSEPROCESS | SEE_MASK_FLAG_NO_UI };
-        sei.lpFile = L"modules\\PowerOCR\\PowerToys.PowerOCR.exe";
+        sei.lpFile = L"PowerToys.PowerOCR.exe";
         sei.nShow = SW_SHOWNORMAL;
         sei.lpParameters = executable_args.data();
         if (ShellExecuteExW(&sei))
@@ -292,6 +293,13 @@ public:
     virtual bool is_enabled() override
     {
         return m_enabled;
+    }
+
+    // Returns whether the PowerToys should be enabled by default
+    virtual bool is_enabled_by_default() const override
+    {
+        // disabled by default for Windows 11 and enabled by default on Windows 10
+        return !package::IsWin11OrGreater();
     }
 };
 

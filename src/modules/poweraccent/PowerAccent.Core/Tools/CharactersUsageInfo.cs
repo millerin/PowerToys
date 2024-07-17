@@ -36,13 +36,13 @@ namespace PowerAccent.Core.Tools
 
         public void IncrementUsageFrequency(string character)
         {
-            if (_characterUsageCounters.ContainsKey(character))
+            if (_characterUsageCounters.TryGetValue(character, out uint currentCount))
             {
-                _characterUsageCounters[character]++;
+                _characterUsageCounters[character] = currentCount + 1;
             }
             else
             {
-                _characterUsageCounters.Add(character, 1);
+                _characterUsageCounters[character] = 1;
             }
 
             _characterUsageTimestamp[character] = DateTimeOffset.Now.ToUnixTimeSeconds();

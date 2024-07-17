@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Controls;
-using ControlzEx.Standard;
 using ManagedCommon;
 using Microsoft.PowerToys.Run.Plugin.System.Components;
 using Microsoft.PowerToys.Run.Plugin.System.Properties;
@@ -26,10 +25,13 @@ namespace Microsoft.PowerToys.Run.Plugin.System
         private bool _showSuccessOnEmptyRB;
         private bool _localizeSystemCommands;
         private bool _reduceNetworkResultScore;
+        private bool _separateEmptyRB;
 
         public string Name => Resources.Microsoft_plugin_sys_plugin_name;
 
         public string Description => Resources.Microsoft_plugin_sys_plugin_description;
+
+        public static string PluginID => "CEA08895D2544B019B2E9C5009600DF4";
 
         public string IconTheme { get; set; }
 
@@ -54,6 +56,12 @@ namespace Microsoft.PowerToys.Run.Plugin.System
                 Key = "LocalizeSystemCommands",
                 DisplayLabel = Resources.Use_localized_system_commands,
                 Value = true,
+            },
+            new PluginAdditionalOption()
+            {
+                Key = "SeparateResultEmptyRB",
+                DisplayLabel = Resources.Microsoft_plugin_sys_RecycleBin_ShowEmptySeparate,
+                Value = false,
             },
             new PluginAdditionalOption()
             {
@@ -90,7 +98,7 @@ namespace Microsoft.PowerToys.Run.Plugin.System
             }
 
             // normal system commands are fast and can be returned immediately
-            var systemCommands = Commands.GetSystemCommands(IsBootedInUefiMode, IconTheme, culture, _confirmSystemCommands);
+            var systemCommands = Commands.GetSystemCommands(IsBootedInUefiMode, _separateEmptyRB, _confirmSystemCommands, _showSuccessOnEmptyRB, IconTheme, culture);
             foreach (var c in systemCommands)
             {
                 var resultMatch = StringMatcher.FuzzySearch(query.Search, c.Title);
@@ -118,7 +126,7 @@ namespace Microsoft.PowerToys.Run.Plugin.System
             // {
             //    results.Add(new Result()
             //    {
-            //        Title = "Getting network informations. Please wait ...",
+            //        Title = "Getting network information. Please wait ...",
             //        IcoPath = $"Images\\networkAdapter.{IconTheme}.png",
             //        Score = StringMatcher.FuzzySearch("address", "ip address").Score,
             //    });
@@ -209,6 +217,7 @@ namespace Microsoft.PowerToys.Run.Plugin.System
             var showSuccessOnEmptyRB = false;
             var localizeSystemCommands = true;
             var reduceNetworkResultScore = true;
+            var separateEmptyRB = false;
 
             if (settings != null && settings.AdditionalOptions != null)
             {
@@ -223,12 +232,16 @@ namespace Microsoft.PowerToys.Run.Plugin.System
 
                 var optionNetworkScore = settings.AdditionalOptions.FirstOrDefault(x => x.Key == "ReduceNetworkResultScore");
                 reduceNetworkResultScore = optionNetworkScore?.Value ?? reduceNetworkResultScore;
+
+                var optionSeparateEmptyRB = settings.AdditionalOptions.FirstOrDefault(x => x.Key == "SeparateResultEmptyRB");
+                separateEmptyRB = optionSeparateEmptyRB?.Value ?? separateEmptyRB;
             }
 
             _confirmSystemCommands = confirmSystemCommands;
             _showSuccessOnEmptyRB = showSuccessOnEmptyRB;
             _localizeSystemCommands = localizeSystemCommands;
             _reduceNetworkResultScore = reduceNetworkResultScore;
+            _separateEmptyRB = separateEmptyRB;
         }
     }
 }

@@ -7,12 +7,12 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Abstractions;
-using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading.Tasks;
 using global::PowerToys.GPOWrapper;
+using ManagedCommon;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
@@ -47,8 +47,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
         public ButtonClickCommand UpdateNowButtonEventHandler { get; set; }
 
-        public Func<string, int> UpdateUIThemeCallBack { get; }
-
         public Func<string, int> SendConfigMSG { get; }
 
         public Func<string, int> SendRestartAsAdminConfigMSG { get; }
@@ -67,7 +65,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
         private SettingsBackupAndRestoreUtils settingsBackupAndRestoreUtils = SettingsBackupAndRestoreUtils.Instance;
 
-        public GeneralViewModel(ISettingsRepository<GeneralSettings> settingsRepository, string runAsAdminText, string runAsUserText, bool isElevated, bool isAdmin, Func<string, int> updateTheme, Func<string, int> ipcMSGCallBackFunc, Func<string, int> ipcMSGRestartAsAdminMSGCallBackFunc, Func<string, int> ipcMSGCheckForUpdatesCallBackFunc, string configFileSubfolder = "", Action dispatcherAction = null, Action hideBackupAndRestoreMessageAreaAction = null, Action<int> doBackupAndRestoreDryRun = null, Func<Task<string>> pickSingleFolderDialog = null, object resourceLoader = null)
+        public GeneralViewModel(ISettingsRepository<GeneralSettings> settingsRepository, string runAsAdminText, string runAsUserText, bool isElevated, bool isAdmin, Func<string, int> ipcMSGCallBackFunc, Func<string, int> ipcMSGRestartAsAdminMSGCallBackFunc, Func<string, int> ipcMSGCheckForUpdatesCallBackFunc, string configFileSubfolder = "", Action dispatcherAction = null, Action hideBackupAndRestoreMessageAreaAction = null, Action<int> doBackupAndRestoreDryRun = null, Func<Task<string>> pickSingleFolderDialog = null, object resourceLoader = null)
         {
             CheckForUpdatesEventHandler = new ButtonClickCommand(CheckForUpdatesClick);
             RestartElevatedButtonEventHandler = new ButtonClickCommand(RestartElevated);
@@ -82,10 +80,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             ResourceLoader = resourceLoader;
 
             // To obtain the general settings configuration of PowerToys if it exists, else to create a new file and return the default configurations.
-            if (settingsRepository == null)
-            {
-                throw new ArgumentNullException(nameof(settingsRepository));
-            }
+            ArgumentNullException.ThrowIfNull(settingsRepository);
 
             GeneralSettingsConfig = settingsRepository.SettingsConfig;
             UpdatingSettingsConfig = UpdatingSettings.LoadSettings();
@@ -94,15 +89,10 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 UpdatingSettingsConfig = new UpdatingSettings();
             }
 
-            // set the callback functions value to hangle outgoing IPC message.
+            // set the callback functions value to handle outgoing IPC message.
             SendConfigMSG = ipcMSGCallBackFunc;
             SendCheckForUpdatesConfigMSG = ipcMSGCheckForUpdatesCallBackFunc;
             SendRestartAsAdminConfigMSG = ipcMSGRestartAsAdminMSGCallBackFunc;
-
-            // set the callback function value to update the UI theme.
-            UpdateUIThemeCallBack = updateTheme;
-
-            UpdateUIThemeCallBack(GeneralSettingsConfig.Theme);
 
             // Update Settings file folder:
             _settingsConfigFileFolder = configFileSubfolder;
@@ -124,12 +114,17 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     break;
             }
 
+            _isDevBuild = Helper.GetProductVersion() == "v0.0.1";
+
             _startup = GeneralSettingsConfig.Startup;
+            _showNewUpdatesToastNotification = GeneralSettingsConfig.ShowNewUpdatesToastNotification;
             _autoDownloadUpdates = GeneralSettingsConfig.AutoDownloadUpdates;
+            _showWhatsNewAfterUpdates = GeneralSettingsConfig.ShowWhatsNewAfterUpdates;
             _enableExperimentation = GeneralSettingsConfig.EnableExperimentation;
 
             _isElevated = isElevated;
             _runElevated = GeneralSettingsConfig.RunElevated;
+            _enableWarningsElevatedApps = GeneralSettingsConfig.EnableWarningsElevatedApps;
 
             RunningAsUserDefaultText = runAsUserText;
             RunningAsAdminDefaultText = runAsAdminText;
@@ -141,7 +136,10 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             _newAvailableVersionLink = UpdatingSettingsConfig.ReleasePageLink;
             _updateCheckedDate = UpdatingSettingsConfig.LastCheckedDateLocalized;
 
+            _newUpdatesToastIsGpoDisabled = GPOWrapper.GetDisableNewUpdateToastValue() == GpoRuleConfigured.Enabled;
+            _autoDownloadUpdatesIsGpoDisabled = GPOWrapper.GetDisableAutomaticUpdateDownloadValue() == GpoRuleConfigured.Enabled;
             _experimentationIsGpoDisallowed = GPOWrapper.GetAllowExperimentationValue() == GpoRuleConfigured.Disabled;
+            _showWhatsNewAfterUpdatesIsGpoDisabled = GPOWrapper.GetDisableShowWhatsNewAfterUpdatesValue() == GpoRuleConfigured.Enabled;
 
             if (dispatcherAction != null)
             {
@@ -149,13 +147,20 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
+        private static bool _isDevBuild;
         private bool _startup;
         private bool _isElevated;
         private bool _runElevated;
         private bool _isAdmin;
+        private bool _enableWarningsElevatedApps;
         private int _themeIndex;
 
+        private bool _showNewUpdatesToastNotification;
+        private bool _newUpdatesToastIsGpoDisabled;
         private bool _autoDownloadUpdates;
+        private bool _autoDownloadUpdatesIsGpoDisabled;
+        private bool _showWhatsNewAfterUpdates;
+        private bool _showWhatsNewAfterUpdatesIsGpoDisabled;
         private bool _enableExperimentation;
         private bool _experimentationIsGpoDisallowed;
 
@@ -272,11 +277,62 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
+        public bool EnableWarningsElevatedApps
+        {
+            get
+            {
+                return _enableWarningsElevatedApps;
+            }
+
+            set
+            {
+                if (_enableWarningsElevatedApps != value)
+                {
+                    _enableWarningsElevatedApps = value;
+                    GeneralSettingsConfig.EnableWarningsElevatedApps = value;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+
+        public bool SomeUpdateSettingsAreGpoManaged
+        {
+            get
+            {
+                return _newUpdatesToastIsGpoDisabled ||
+                    (_isAdmin && _autoDownloadUpdatesIsGpoDisabled) ||
+                    _showWhatsNewAfterUpdatesIsGpoDisabled;
+            }
+        }
+
+        public bool ShowNewUpdatesToastNotification
+        {
+            get
+            {
+                return _showNewUpdatesToastNotification && !_newUpdatesToastIsGpoDisabled;
+            }
+
+            set
+            {
+                if (_showNewUpdatesToastNotification != value)
+                {
+                    _showNewUpdatesToastNotification = value;
+                    GeneralSettingsConfig.ShowNewUpdatesToastNotification = value;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+
+        public bool IsShowNewUpdatesToastNotificationCardEnabled
+        {
+            get => !_isDevBuild && !_newUpdatesToastIsGpoDisabled;
+        }
+
         public bool AutoDownloadUpdates
         {
             get
             {
-                return _autoDownloadUpdates;
+                return _autoDownloadUpdates && !_autoDownloadUpdatesIsGpoDisabled;
             }
 
             set
@@ -288,6 +344,34 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     NotifyPropertyChanged();
                 }
             }
+        }
+
+        public bool IsAutoDownloadUpdatesCardEnabled
+        {
+            get => !_isDevBuild && !_autoDownloadUpdatesIsGpoDisabled;
+        }
+
+        public bool ShowWhatsNewAfterUpdates
+        {
+            get
+            {
+                return _showWhatsNewAfterUpdates && !_showWhatsNewAfterUpdatesIsGpoDisabled;
+            }
+
+            set
+            {
+                if (_showWhatsNewAfterUpdates != value)
+                {
+                    _showWhatsNewAfterUpdates = value;
+                    GeneralSettingsConfig.ShowWhatsNewAfterUpdates = value;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+
+        public bool IsShowWhatsNewAfterUpdatesCardEnabled
+        {
+            get => !_isDevBuild && !_showWhatsNewAfterUpdatesIsGpoDisabled;
         }
 
         public bool EnableExperimentation
@@ -311,14 +395,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         public bool IsExperimentationGpoDisallowed
         {
             get => _experimentationIsGpoDisallowed;
-        }
-
-        public static bool AutoUpdatesEnabled
-        {
-            get
-            {
-                return Helper.GetProductVersion() != "v0.0.1";
-            }
         }
 
         public string SettingsBackupAndRestoreDir
@@ -358,14 +434,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
                     _themeIndex = value;
 
-                    try
-                    {
-                        UpdateUIThemeCallBack(GeneralSettingsConfig.Theme);
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.LogError("Exception encountered when changing Settings theme", e);
-                    }
+                    App.ThemeService.ApplyTheme();
 
                     NotifyPropertyChanged();
                 }
@@ -659,7 +728,15 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         {
             get
             {
-                return AutoUpdatesEnabled && !IsNewVersionDownloading;
+                return !_isDevBuild && !IsNewVersionDownloading;
+            }
+        }
+
+        public bool IsUpdatePanelVisible
+        {
+            get
+            {
+                return PowerToysUpdatingState == UpdatingSettings.UpdatingState.UpToDate || PowerToysUpdatingState == UpdatingSettings.UpdatingState.NetworkError;
             }
         }
 
@@ -679,7 +756,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         }
 
         /// <summary>
-        /// Method <c>SelectSettingBackupDir</c> opens folder browser to select a backup and retore location.
+        /// Method <c>SelectSettingBackupDir</c> opens folder browser to select a backup and restore location.
         /// </summary>
         private async void SelectSettingBackupDir()
         {
@@ -750,7 +827,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
             _settingsBackupRestoreMessageVisible = true;
             _backupRestoreMessageSeverity = results.Severity;
-            _settingsBackupMessage = GetResourceString(results.Message);
+            _settingsBackupMessage = GetResourceString(results.Message) + results.OptionalMessage;
 
             // now we do a dry run to get the results for "setting match"
             var settingsUtils = new SettingsUtils();
@@ -776,33 +853,6 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         // callback function to launch the URL to check for updates.
         private void CheckForUpdatesClick()
         {
-            // check if network is available
-            bool isNetAvailable = IsNetworkAvailable();
-
-            // check if the state changed
-            bool prevState = _isNoNetwork;
-            _isNoNetwork = !isNetAvailable;
-            if (prevState != _isNoNetwork)
-            {
-                NotifyPropertyChanged(nameof(IsNoNetwork));
-            }
-
-            if (!isNetAvailable)
-            {
-                _isNewVersionDownloading = false;
-                return;
-            }
-
-            RefreshUpdatingState();
-            IsNewVersionDownloading = string.IsNullOrEmpty(UpdatingSettingsConfig.DownloadedInstallerFilename);
-            NotifyPropertyChanged(nameof(IsDownloadAllowed));
-
-            if (_isNewVersionChecked)
-            {
-                _isNewVersionChecked = !IsNewVersionDownloading;
-                NotifyPropertyChanged(nameof(IsNewVersionCheckedAndUpToDate));
-            }
-
             GeneralSettingsConfig.CustomActionName = "check_for_updates";
 
             OutGoingGeneralSettings outsettings = new OutGoingGeneralSettings(GeneralSettingsConfig);
@@ -936,54 +986,15 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                 PowerToysNewAvailableVersionLink = UpdatingSettingsConfig.ReleasePageLink;
                 UpdateCheckedDate = UpdatingSettingsConfig.LastCheckedDateLocalized;
 
+                _isNoNetwork = PowerToysUpdatingState == UpdatingSettings.UpdatingState.NetworkError;
+                NotifyPropertyChanged(nameof(IsNoNetwork));
+                NotifyPropertyChanged(nameof(IsNewVersionDownloading));
+                NotifyPropertyChanged(nameof(IsUpdatePanelVisible));
                 _isNewVersionChecked = PowerToysUpdatingState == UpdatingSettings.UpdatingState.UpToDate && !IsNewVersionDownloading;
                 NotifyPropertyChanged(nameof(IsNewVersionCheckedAndUpToDate));
 
                 NotifyPropertyChanged(nameof(IsDownloadAllowed));
             }
-        }
-
-        /// <summary>
-        /// Indicates whether any network connection is available
-        /// Filter virtual network cards.
-        /// </summary>
-        /// <returns>
-        ///     <c>true</c> if a network connection is available; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool IsNetworkAvailable()
-        {
-            if (!NetworkInterface.GetIsNetworkAvailable())
-            {
-                return false;
-            }
-
-            foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
-            {
-                // discard because of standard reasons
-                if ((ni.OperationalStatus != OperationalStatus.Up) ||
-                    (ni.NetworkInterfaceType == NetworkInterfaceType.Loopback) ||
-                    (ni.NetworkInterfaceType == NetworkInterfaceType.Tunnel))
-                {
-                    continue;
-                }
-
-                // discard virtual cards (virtual box, virtual pc, etc.)
-                if (ni.Description.Contains("virtual", StringComparison.OrdinalIgnoreCase) ||
-                    ni.Name.Contains("virtual", StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
-                // discard "Microsoft Loopback Adapter", it will not show as NetworkInterfaceType.Loopback but as Ethernet Card.
-                if (ni.Description.Equals("Microsoft Loopback Adapter", StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
-                return true;
-            }
-
-            return false;
         }
     }
 }

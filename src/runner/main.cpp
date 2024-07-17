@@ -46,6 +46,7 @@
 #include <common/utils/window.h>
 #include <common/version/version.h>
 #include <common/utils/string_utils.h>
+#include <common/utils/gpo.h>
 
 // disabling warning 4458 - declaration of 'identifier' hides class member
 // to avoid warnings from GDI files - can't add winRT directory to external code
@@ -81,41 +82,17 @@ inline wil::unique_mutex_nothrow create_msi_mutex()
 void open_menu_from_another_instance(std::optional<std::string> settings_window)
 {
     const HWND hwnd_main = FindWindowW(L"PToyTrayIconWindow", nullptr);
-    LPARAM msg = static_cast<LPARAM>(ESettingsWindowNames::Overview);
-    if (settings_window.has_value())
+    LPARAM msg = static_cast<LPARAM>(ESettingsWindowNames::Dashboard);
+    if (settings_window.has_value() && settings_window.value() != "")
     {
         msg = static_cast<LPARAM>(ESettingsWindowNames_from_string(settings_window.value()));
     }
     PostMessageW(hwnd_main, WM_COMMAND, ID_SETTINGS_MENU_COMMAND, msg);
 }
 
-void debug_verify_launcher_assets()
+int runner(bool isProcessElevated, bool openSettings, std::string settingsWindow, bool openOobe, bool openScoobe, bool showRestartNotificationAfterUpdate)
 {
-    try
-    {
-        namespace fs = std::filesystem;
-        const fs::path powertoysRoot = get_module_folderpath();
-        constexpr std::array<std::string_view, 4> assetsToCheck = { "modules\\launcher\\Images\\app.dark.png",
-                                                                    "modules\\launcher\\Images\\app.light.png",
-                                                                    "modules\\launcher\\Images\\app_error.dark.png",
-                                                                    "modules\\launcher\\Images\\app_error.light.png" };
-        for (const auto asset : assetsToCheck)
-        {
-            const auto assetPath = powertoysRoot / asset;
-            if (!fs::is_regular_file(assetPath))
-            {
-                Logger::error("{} couldn't be found.", assetPath.string());
-            }
-        }
-    }
-    catch (...)
-    {
-    }
-}
-
-int runner(bool isProcessElevated, bool openSettings, std::string settingsWindow, bool openOobe, bool openScoobe)
-{
-    Logger::info("Runner is starting. Elevated={}", isProcessElevated);
+    Logger::info("Runner is starting. Elevated={} openOobe={} openScoobe={} showRestartNotificationAfterUpdate={}", isProcessElevated, openOobe, openScoobe, showRestartNotificationAfterUpdate);
     DPIAware::EnableDPIAwarenessForThisProcess();
 
 #if _DEBUG && _WIN64
@@ -124,13 +101,23 @@ int runner(bool isProcessElevated, bool openSettings, std::string settingsWindow
 //init_global_error_handlers();
 #endif
     Trace::RegisterProvider();
-    start_tray_icon();
+    start_tray_icon(isProcessElevated);
     CentralizedKeyboardHook::Start();
 
     int result = -1;
     try
     {
-        debug_verify_launcher_assets();
+        if (!openOobe && showRestartNotificationAfterUpdate)
+        {
+            std::thread{
+                [] {
+                    // Wait a bit, because Windows has a delay until it picks up toast notification registration in the registry
+                    Sleep(10000);
+                    Logger::info("Showing toast notification asking to restart PC");
+                    notifications::show_toast(GET_RESOURCE_STRING(IDS_PT_VERSION_CHANGE_ASK_FOR_COMPUTER_RESTART).c_str(), L"PowerToys");
+                }
+            }.detach();
+        }
 
         std::thread{ [] {
             PeriodicUpdateWorker();
@@ -147,26 +134,34 @@ int runner(bool isProcessElevated, bool openSettings, std::string settingsWindow
         // Load Powertoys DLLs
 
         std::vector<std::wstring_view> knownModules = {
-            L"modules/FancyZones/PowerToys.FancyZonesModuleInterface.dll",
-            L"modules/FileExplorerPreview/PowerToys.powerpreview.dll",
-            L"modules/ImageResizer/PowerToys.ImageResizerExt.dll",
-            L"modules/KeyboardManager/PowerToys.KeyboardManager.dll",
-            L"modules/Launcher/PowerToys.Launcher.dll",
-            L"modules/PowerRename/PowerToys.PowerRenameExt.dll",
-            L"modules/ShortcutGuide/ShortcutGuideModuleInterface/PowerToys.ShortcutGuideModuleInterface.dll",
-            L"modules/ColorPicker/PowerToys.ColorPicker.dll",
-            L"modules/Awake/PowerToys.AwakeModuleInterface.dll",
-            L"modules/MouseUtils/PowerToys.FindMyMouse.dll",
-            L"modules/MouseUtils/PowerToys.MouseHighlighter.dll",
-            L"modules/AlwaysOnTop/PowerToys.AlwaysOnTopModuleInterface.dll",
-            L"modules/MouseUtils/PowerToys.MousePointerCrosshairs.dll",
-            L"modules/PowerAccent/PowerToys.PowerAccentModuleInterface.dll",
-            L"modules/PowerOCR/PowerToys.PowerOCRModuleInterface.dll",
-            L"modules/FileLocksmith/PowerToys.FileLocksmithExt.dll",
-            L"modules/MeasureTool/PowerToys.MeasureToolModuleInterface.dll",
-            L"modules/Hosts/PowerToys.HostsModuleInterface.dll",
+            L"PowerToys.FancyZonesModuleInterface.dll",
+            L"PowerToys.powerpreview.dll",
+            L"PowerToys.ImageResizerExt.dll",
+            L"PowerToys.KeyboardManager.dll",
+            L"PowerToys.Launcher.dll",
+            L"WinUI3Apps/PowerToys.PowerRenameExt.dll",
+            L"PowerToys.ShortcutGuideModuleInterface.dll",
+            L"PowerToys.ColorPicker.dll",
+            L"PowerToys.AwakeModuleInterface.dll",
+            L"PowerToys.FindMyMouse.dll",
+            L"PowerToys.MouseHighlighter.dll",
+            L"PowerToys.MouseJump.dll",
+            L"PowerToys.AlwaysOnTopModuleInterface.dll",
+            L"PowerToys.MousePointerCrosshairs.dll",
+            L"PowerToys.PowerAccentModuleInterface.dll",
+            L"PowerToys.PowerOCRModuleInterface.dll",
+            L"PowerToys.AdvancedPasteModuleInterface.dll",
+            L"WinUI3Apps/PowerToys.FileLocksmithExt.dll",
+            L"WinUI3Apps/PowerToys.RegistryPreviewExt.dll",
+            L"WinUI3Apps/PowerToys.MeasureToolModuleInterface.dll",
+            L"WinUI3Apps/PowerToys.HostsModuleInterface.dll",
+            L"WinUI3Apps/PowerToys.Peek.dll",
+            L"WinUI3Apps/PowerToys.EnvironmentVariablesModuleInterface.dll",
+            L"PowerToys.MouseWithoutBordersModuleInterface.dll",
+            L"PowerToys.CropAndLockModuleInterface.dll",
+            L"PowerToys.CmdNotFoundModuleInterface.dll",
         };
-        const auto VCM_PATH = L"modules/VideoConference/PowerToys.VideoConferenceModule.dll";
+        const auto VCM_PATH = L"PowerToys.VideoConferenceModule.dll";
         if (const auto mf = LoadLibraryA("mf.dll"))
         {
             FreeLibrary(mf);
@@ -281,7 +276,7 @@ toast_notification_handler_result toast_notification_handler(const std::wstring_
 
     if (param == cant_drag_elevated_disable)
     {
-        return notifications::disable_toast(notifications::CantDragElevatedDontShowAgainRegistryPath) ? toast_notification_handler_result::exit_success : toast_notification_handler_result::exit_error;
+        return notifications::disable_toast(notifications::ElevatedDontShowAgainRegistryPath) ? toast_notification_handler_result::exit_success : toast_notification_handler_result::exit_error;
     }
     else if (param.starts_with(update_now))
     {
@@ -301,57 +296,6 @@ toast_notification_handler_result toast_notification_handler(const std::wstring_
     else
     {
         return toast_notification_handler_result::exit_error;
-    }
-}
-
-void cleanup_updates()
-{
-    auto state = UpdateState::read();
-    if (state.state != UpdateState::upToDate)
-    {
-        return;
-    }
-
-    auto update_dir = updating::get_pending_updates_path();
-    if (std::filesystem::exists(update_dir))
-    {
-        // Msi and exe files
-        for (const auto& entry : std::filesystem::directory_iterator(update_dir))
-        {
-            auto entryPath = entry.path().wstring();
-            std::transform(entryPath.begin(), entryPath.end(), entryPath.begin(), ::towlower);
-
-            if (entryPath.ends_with(L".msi") || entryPath.ends_with(L".exe"))
-            {
-                std::error_code err;
-                std::filesystem::remove(entry, err);
-                if (err.value())
-                {
-                    Logger::warn("Failed to delete installer file {}. {}", entry.path().string(), err.message());
-                }
-            }
-        }
-    }
-
-    // Log files
-    auto rootPath{ PTSettingsHelper::get_root_save_folder_location() };
-    auto currentVersion = left_trim<wchar_t>(get_product_version(), L"v");
-    if (std::filesystem::exists(rootPath))
-    {
-        for (const auto& entry : std::filesystem::directory_iterator(rootPath))
-        {
-            auto entryPath = entry.path().wstring();
-            std::transform(entryPath.begin(), entryPath.end(), entryPath.begin(), ::towlower);
-            if (entry.is_regular_file() && entryPath.ends_with(L".log") && entryPath.find(currentVersion) == std::string::npos)
-            {
-                std::error_code err;
-                std::filesystem::remove(entry, err);
-                if (err.value())
-                {
-                    Logger::warn("Failed to delete log file {}. {}", entry.path().string(), err.message());
-                }
-            }
-        }
     }
 }
 
@@ -443,10 +387,14 @@ int WINAPI WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR l
     }
 
     bool openScoobe = false;
+    bool showRestartNotificationAfterUpdate = false;
     try
     {
         std::wstring last_version_run = PTSettingsHelper::get_last_version_run();
-        openScoobe = last_version_run != get_product_version();
+        const auto product_version = get_product_version();
+        openScoobe = product_version != last_version_run;
+        showRestartNotificationAfterUpdate = openScoobe;
+        Logger::info(L"Scoobe: product_version={} last_version_run={}", product_version, last_version_run);
     }
     catch (const std::exception& e)
     {
@@ -461,7 +409,11 @@ int WINAPI WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR l
         modules();
 
         std::thread{ [] {
-            cleanup_updates();
+            auto state = UpdateState::read();
+            if (state.state == UpdateState::upToDate)
+            {
+                updating::cleanup_updates();
+            }
         } }.detach();
 
         auto general_settings = load_general_settings();
@@ -471,6 +423,17 @@ int WINAPI WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR l
         const bool elevated = is_process_elevated();
         const bool with_dont_elevate_arg = cmdLine.find("--dont-elevate") != std::string::npos;
         const bool run_elevated_setting = general_settings.GetNamedBoolean(L"run_elevated", false);
+        const bool with_restartedElevated_arg = cmdLine.find("--restartedElevated") != std::string::npos;
+
+        // Update scoobe behavior based on setting and gpo
+        bool scoobeSettingDisabled = general_settings.GetNamedBoolean(L"show_whats_new_after_updates", true) == false;
+        bool scoobeDisabledByGpo = powertoys_gpo::getDisableShowWhatsNewAfterUpdatesValue() == powertoys_gpo::gpo_rule_configured_enabled;
+        if (openScoobe && (scoobeSettingDisabled || scoobeDisabledByGpo))
+        {
+            // Scoobe should show after an update, but is disabled by policy or setting
+            Logger::info(L"Scoobe: Showing scoobe after updates is disabled by setting or by GPO.");
+            openScoobe = false;
+        }
 
         if (elevated && with_dont_elevate_arg && !run_elevated_setting)
         {
@@ -478,9 +441,15 @@ int WINAPI WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR l
             schedule_restart_as_non_elevated();
             result = 0;
         }
-        else if (elevated || !run_elevated_setting || with_dont_elevate_arg)
+        else if (elevated || !run_elevated_setting || with_dont_elevate_arg || (!elevated && with_restartedElevated_arg))
         {
-            result = runner(elevated, open_settings, settings_window, openOobe, openScoobe);
+            // The condition (!elevated && with_restartedElevated_arg) solves issue #19307. Restart elevated loop detected, running non-elevated
+            if (!elevated && with_restartedElevated_arg)
+            {
+                Logger::info("Restart as elevated failed. Running non-elevated.");
+            }
+
+            result = runner(elevated, open_settings, settings_window, openOobe, openScoobe, showRestartNotificationAfterUpdate);
 
             if (result == 0)
             {

@@ -50,7 +50,7 @@ namespace PowerLauncher.ViewModel
         {
             get
             {
-                return _settings.MaxResultsToShow * 75;
+                return (_settings.MaxResultsToShow * 56) + 16;
             }
         }
 
@@ -97,7 +97,7 @@ namespace PowerLauncher.ViewModel
             }
         }
 
-        private Visibility _visibility = Visibility.Hidden;
+        private Visibility _visibility = Visibility.Collapsed;
 
         public Visibility Visibility
         {
@@ -221,9 +221,8 @@ namespace PowerLauncher.ViewModel
                 // Do nothing if there is no selected item
                 if (SelectedItem != null)
                 {
-                    // Tabbing backwards should highlight the last item of the previous row
+                    // Tabbing backwards
                     SelectPrevResult();
-                    SelectedItem?.SelectLastContextButton();
                 }
             }
         }
@@ -264,15 +263,12 @@ namespace PowerLauncher.ViewModel
         /// </summary>
         public void AddResults(List<Result> newRawResults, CancellationToken ct)
         {
-            if (newRawResults == null)
-            {
-                throw new ArgumentNullException(nameof(newRawResults));
-            }
+            ArgumentNullException.ThrowIfNull(newRawResults);
 
             List<ResultViewModel> newResults = new List<ResultViewModel>(newRawResults.Count);
             foreach (Result r in newRawResults)
             {
-                newResults.Add(new ResultViewModel(r, _mainViewModel));
+                newResults.Add(new ResultViewModel(r, _mainViewModel, _settings));
                 ct.ThrowIfCancellationRequested();
             }
 

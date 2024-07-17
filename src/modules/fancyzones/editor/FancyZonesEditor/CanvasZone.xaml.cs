@@ -159,7 +159,7 @@ namespace FancyZonesEditor
             public abstract void Move(int delta);
         }
 
-        private class SnappyHelperMagnetic : SnappyHelperBase
+        private sealed class SnappyHelperMagnetic : SnappyHelperBase
         {
             private List<int> magnetZoneSizes;
             private int freePosition;
@@ -220,7 +220,7 @@ namespace FancyZonesEditor
             }
         }
 
-        private class SnappyHelperNonMagnetic : SnappyHelperBase
+        private sealed class SnappyHelperNonMagnetic : SnappyHelperBase
         {
             public SnappyHelperNonMagnetic(IList<Int32Rect> zones, int zoneIndex, bool isX, ResizeMode mode, int screenAxisOrigin, int screenAxisSize)
                 : base(zones, zoneIndex, isX, mode, screenAxisOrigin, screenAxisSize)
@@ -237,7 +237,7 @@ namespace FancyZonesEditor
         private SnappyHelperBase snappyX;
         private SnappyHelperBase snappyY;
 
-        private SnappyHelperBase NewMagneticSnapper(bool isX, ResizeMode mode)
+        private SnappyHelperMagnetic NewMagneticSnapper(bool isX, ResizeMode mode)
         {
             Rect workingArea = App.Overlay.WorkArea;
             int screenAxisOrigin = (int)(isX ? workingArea.Left : workingArea.Top);
@@ -245,7 +245,7 @@ namespace FancyZonesEditor
             return new SnappyHelperMagnetic(Model.Zones, ZoneIndex, isX, mode, screenAxisOrigin, screenAxisSize);
         }
 
-        private SnappyHelperBase NewNonMagneticSnapper(bool isX, ResizeMode mode)
+        private SnappyHelperNonMagnetic NewNonMagneticSnapper(bool isX, ResizeMode mode)
         {
             Rect workingArea = App.Overlay.WorkArea;
             int screenAxisOrigin = (int)(isX ? workingArea.Left : workingArea.Top);

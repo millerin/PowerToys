@@ -204,8 +204,9 @@ namespace BufferValidationHelpers
                     }
                     else
                     {
-                        // warn and reset the drop down
-                        errorType = ShortcutErrorType::ShortcutNotMoreThanOneActionKey;
+                        // this used to "warn and reset the drop down" but for now, since we will allow Chords, we do allow this
+                        // leaving the here and commented out for posterity, for now.
+                        // errorType = ShortcutErrorType::ShortcutNotMoreThanOneActionKey;
                     }
                 }
                 else
@@ -220,7 +221,7 @@ namespace BufferValidationHelpers
         // After validating the shortcut, now for errors like remap to same shortcut, remap shortcut more than once, Win L and Ctrl Alt Del
         if (errorType == ShortcutErrorType::NoError)
         {
-            KeyShortcutUnion tempShortcut;
+            KeyShortcutTextUnion tempShortcut;
             if (isHybridControl && KeyDropDownControl::GetNumberOfSelectedKeys(selectedCodes) == 1)
             {
                 tempShortcut = (DWORD)*std::find_if(selectedCodes.begin(), selectedCodes.end(), [](int32_t a) { return a != -1 && a != 0; });

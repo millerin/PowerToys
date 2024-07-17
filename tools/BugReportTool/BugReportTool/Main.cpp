@@ -27,10 +27,24 @@ using namespace winrt::Windows::Data::Json;
 
 map<wstring, vector<wstring>> escapeInfo = {
     { L"FancyZones\\app-zone-history.json", { L"app-zone-history/app-path" } },
-    { L"FancyZones\\settings.json", { L"properties/fancyzones_excluded_apps" } }
+    { L"FancyZones\\settings.json", { L"properties/fancyzones_excluded_apps" } },
+    { L"MouseWithoutBorders\\settings.json", { L"properties/SecurityKey" } }, // avoid leaking connection key
+    { L"Keyboard Manager\\default.json", {
+        L"remapKeysToText",
+        L"remapShortcutsToText",
+        L"remapShortcuts/global/runProgramFilePath",
+        L"remapShortcuts/global/runProgramArgs",
+        L"remapShortcuts/global/runProgramStartInDir",
+        L"remapShortcuts/global/openUri",
+        L"remapShortcuts/appSpecific/runProgramFilePath",
+        L"remapShortcuts/appSpecific/runProgramArgs",
+        L"remapShortcuts/appSpecific/runProgramStartInDir",
+        L"remapShortcuts/appSpecific/openUri",
+        } }, // avoid leaking personal information from text, URI or application mappings
 };
 
 vector<wstring> filesToDelete = {
+    L"AdvancedPaste\\lastQuery.json",
     L"PowerToys Run\\Cache",
     L"PowerRename\\replace-mru.json",
     L"PowerRename\\search-mru.json",
@@ -256,7 +270,8 @@ void ReportVCMLogs(const filesystem::path& tmpDir, const filesystem::path& repor
 
 void ReportInstallerLogs(const filesystem::path& tmpDir, const filesystem::path& reportDir)
 {
-    const char* logFilePrefix = "powertoys-bootstrapper-msi-";
+    const char* bootstrapperLogFilePrefix = "powertoys-bootstrapper-msi-";
+    const char* PTLogFilePrefix = "PowerToysMSIInstaller_";
 
     for (auto& entry : directory_iterator{ tmpDir })
     {
@@ -267,7 +282,7 @@ void ReportInstallerLogs(const filesystem::path& tmpDir, const filesystem::path&
         }
 
         const auto fileName = entry.path().filename().string();
-        if (!fileName.starts_with(logFilePrefix))
+        if (!fileName.starts_with(bootstrapperLogFilePrefix) && !fileName.starts_with(PTLogFilePrefix))
         {
             continue;
         }

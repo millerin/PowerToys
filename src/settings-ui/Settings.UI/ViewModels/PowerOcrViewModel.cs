@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.Json;
 using System.Timers;
+using Common.UI;
 using global::PowerToys.GPOWrapper;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
@@ -73,31 +74,22 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             Func<string, int> ipcMSGCallBackFunc)
         {
             // To obtain the general settings configurations of PowerToys Settings.
-            if (settingsRepository == null)
-            {
-                throw new ArgumentNullException(nameof(settingsRepository));
-            }
+            ArgumentNullException.ThrowIfNull(settingsRepository);
 
             GeneralSettingsConfig = settingsRepository.SettingsConfig;
 
             // To obtain the settings configurations of Fancy zones.
-            if (settingsRepository == null)
-            {
-                throw new ArgumentNullException(nameof(settingsRepository));
-            }
+            ArgumentNullException.ThrowIfNull(settingsRepository);
 
             _settingsUtils = settingsUtils ?? throw new ArgumentNullException(nameof(settingsUtils));
 
-            if (powerOcrsettingsRepository == null)
-            {
-                throw new ArgumentNullException(nameof(powerOcrsettingsRepository));
-            }
+            ArgumentNullException.ThrowIfNull(powerOcrsettingsRepository);
 
             _powerOcrSettings = powerOcrsettingsRepository.SettingsConfig;
 
             InitializeEnabledValue();
 
-            // set the callback functions value to hangle outgoing IPC message.
+            // set the callback functions value to handle outgoing IPC message.
             SendConfigMSG = ipcMSGCallBackFunc;
 
             _delayedTimer = new Timer();
@@ -117,7 +109,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
             else
             {
-                _isEnabled = GeneralSettingsConfig.Enabled.PowerOCR;
+                _isEnabled = GeneralSettingsConfig.Enabled.PowerOcr;
             }
         }
 
@@ -137,13 +129,18 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     _isEnabled = value;
                     OnPropertyChanged(nameof(IsEnabled));
 
-                    // Set the status of PowerOCR in the general settings
-                    GeneralSettingsConfig.Enabled.PowerOCR = value;
+                    // Set the status of PowerOcr in the general settings
+                    GeneralSettingsConfig.Enabled.PowerOcr = value;
                     var outgoing = new OutGoingGeneralSettings(GeneralSettingsConfig);
 
                     SendConfigMSG(outgoing.ToString());
                 }
             }
+        }
+
+        public bool IsWin11OrGreater
+        {
+            get => OSVersionHelper.IsWindows11();
         }
 
         public bool IsEnabledGpoConfigured
@@ -158,7 +155,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             {
                 if (_powerOcrSettings.Properties.ActivationShortcut != value)
                 {
-                    _powerOcrSettings.Properties.ActivationShortcut = value;
+                    _powerOcrSettings.Properties.ActivationShortcut = value ?? _powerOcrSettings.Properties.DefaultActivationShortcut;
                     OnPropertyChanged(nameof(ActivationShortcut));
 
                     _settingsUtils.SaveSettings(_powerOcrSettings.ToJsonString(), PowerOcrSettings.ModuleName);
@@ -178,12 +175,12 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             AvailableLanguages.Clear();
             foreach (Language language in possibleOcrLanguages)
             {
-                if (_powerOcrSettings.Properties.PreferredLanguage?.Equals(language.DisplayName) == true)
+                if (_powerOcrSettings.Properties.PreferredLanguage?.Equals(language.DisplayName, StringComparison.Ordinal) == true)
                 {
                     preferredLanguageIndex = AvailableLanguages.Count;
                 }
 
-                if (systemCulture.DisplayName.Equals(language.DisplayName) || systemCulture.Parent.DisplayName.Equals(language.DisplayName))
+                if (systemCulture.DisplayName.Equals(language.DisplayName, StringComparison.Ordinal) || systemCulture.Parent.DisplayName.Equals(language.DisplayName, StringComparison.Ordinal))
                 {
                     systemLanguageIndex = AvailableLanguages.Count;
                 }

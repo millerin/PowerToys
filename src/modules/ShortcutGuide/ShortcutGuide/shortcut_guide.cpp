@@ -73,7 +73,7 @@ namespace
         result.hwnd = active_window;
         // In reality, Windows Snap works if even one of those styles is set
         // for a window, it is just limited. If there is no WS_MAXIMIZEBOX using
-        // WinKey + Up just won't maximize the window. Similary, without
+        // WinKey + Up just won't maximize the window. Similarly, without
         // WS_MINIMIZEBOX the window will not get minimized. A "Save As..." dialog
         // is a example of such window - it can be snapped to both sides and to
         // all screen corners, but will not get maximized nor minimized.
@@ -160,6 +160,30 @@ namespace
         return CallNextHookEx(NULL, nCode, wParam, lParam);
     }
 
+    LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam)
+    {
+        if (nCode >= 0)
+        {
+            switch (wParam)
+            {
+            case WM_LBUTTONUP:
+            case WM_RBUTTONUP:
+            case WM_MBUTTONUP:
+            case WM_XBUTTONUP:
+                // Don't close with mouse click if activation is windows key and the key is pressed
+                if (!overlay_window_instance->win_key_activation() || !isWinPressed())
+                {
+                    overlay_window_instance->CloseWindow(HideWindowType::MOUSE_BUTTONUP);
+                }
+                break;
+            default:
+                break;
+            }
+        }
+
+        return CallNextHookEx(0, nCode, wParam, lParam);
+    }
+
     std::wstring ToWstring(HideWindowType type)
     {
         switch (type)
@@ -172,6 +196,8 @@ namespace
             return L"WIN_SHORTCUT_PRESSED";
         case HideWindowType::THE_SHORTCUT_PRESSED:
             return L"THE_SHORTCUT_PRESSED";
+        case HideWindowType::MOUSE_BUTTONUP:
+            return L"MOUSE_BUTTONUP";
         }
 
         return L"";
@@ -190,6 +216,12 @@ OverlayWindow::OverlayWindow(HWND activeWindow)
     if (!keyboardHook)
     {
         Logger::warn(L"Failed to create low level keyboard hook. {}", get_last_error_or_default(GetLastError()));
+    }
+
+    mouseHook = SetWindowsHookEx(WH_MOUSE_LL, LowLevelMouseProc, GetModuleHandle(NULL), NULL);
+    if (!mouseHook)
+    {
+        Logger::warn(L"Failed to create low level mouse hook. {}", get_last_error_or_default(GetLastError()));
     }
 }
 
@@ -314,6 +346,11 @@ void OverlayWindow::was_hidden()
 bool OverlayWindow::overlay_visible() const
 {
     return target_state->active();
+}
+
+bool OverlayWindow::win_key_activation() const
+{
+    return shouldReactToPressedWinKey.value;
 }
 
 void OverlayWindow::init_settings()

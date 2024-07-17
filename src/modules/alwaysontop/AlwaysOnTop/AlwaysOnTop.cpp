@@ -8,6 +8,10 @@
 #include <common/utils/winapi_error.h>
 #include <common/utils/process_path.h>
 
+#include <common/utils/elevation.h>
+#include <common/notifications/NotificationUtil.h>
+#include <Generated Files/resource.h>
+
 #include <interop/shared_constants.h>
 
 #include <trace.h>
@@ -24,7 +28,8 @@ bool isExcluded(HWND window)
 {
     auto processPath = get_process_path(window);
     CharUpperBuffW(processPath.data(), static_cast<DWORD>(processPath.length()));
-    return find_app_name_in_path(processPath, AlwaysOnTopSettings::settings().excludedApps);
+
+    return check_excluded_app(window, processPath, AlwaysOnTopSettings::settings().excludedApps);
 }
 
 AlwaysOnTop::AlwaysOnTop(bool useLLKH) :
@@ -488,6 +493,10 @@ void AlwaysOnTop::HandleWinHookEvent(WinHookEvent* data) noexcept
     break;
     case EVENT_SYSTEM_FOREGROUND:
     {
+        if (!is_process_elevated() && IsProcessOfWindowElevated(data->hwnd))
+        {
+            notifications::WarnIfElevationIsRequired(GET_RESOURCE_STRING(IDS_ALWAYSONTOP), GET_RESOURCE_STRING(IDS_SYSTEM_FOREGROUND_ELEVATED), GET_RESOURCE_STRING(IDS_SYSTEM_FOREGROUND_ELEVATED_LEARN_MORE), GET_RESOURCE_STRING(IDS_SYSTEM_FOREGROUND_ELEVATED_DIALOG_DONT_SHOW_AGAIN));
+        }
         RefreshBorders();
     }
     break;

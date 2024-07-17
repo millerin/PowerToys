@@ -28,9 +28,11 @@ void ReportGPOValues(const std::filesystem::path& tmpDir)
     reportPath.append(L"gpo-configuration-info.txt");
     std::wofstream report(reportPath);
     report << "GPO policies configuration" << std::endl;
+    report << "getConfiguredAdvancedPasteEnabledValue: " << gpo_rule_configured_to_string(powertoys_gpo::getConfiguredAdvancedPasteEnabledValue()) << std::endl;
     report << "getConfiguredAlwaysOnTopEnabledValue: " << gpo_rule_configured_to_string(powertoys_gpo::getConfiguredAlwaysOnTopEnabledValue()) << std::endl;
     report << "getConfiguredAwakeEnabledValue: " << gpo_rule_configured_to_string(powertoys_gpo::getConfiguredAwakeEnabledValue()) << std::endl;
     report << "getConfiguredColorPickerEnabledValue: " << gpo_rule_configured_to_string(powertoys_gpo::getConfiguredColorPickerEnabledValue()) << std::endl;
+    report << "getConfiguredCropAndLockEnabledValue: " << gpo_rule_configured_to_string(powertoys_gpo::getConfiguredCropAndLockEnabledValue()) << std::endl;
     report << "getConfiguredFancyZonesEnabledValue: " << gpo_rule_configured_to_string(powertoys_gpo::getConfiguredFancyZonesEnabledValue()) << std::endl;
     report << "getConfiguredFileLocksmithEnabledValue: " << gpo_rule_configured_to_string(powertoys_gpo::getConfiguredFileLocksmithEnabledValue()) << std::endl;
     report << "getConfiguredSvgPreviewEnabledValue: " << gpo_rule_configured_to_string(powertoys_gpo::getConfiguredSvgPreviewEnabledValue()) << std::endl;
@@ -47,13 +49,23 @@ void ReportGPOValues(const std::filesystem::path& tmpDir)
     report << "getConfiguredKeyboardManagerEnabledValue: " << gpo_rule_configured_to_string(powertoys_gpo::getConfiguredKeyboardManagerEnabledValue()) << std::endl;
     report << "getConfiguredFindMyMouseEnabledValue: " << gpo_rule_configured_to_string(powertoys_gpo::getConfiguredFindMyMouseEnabledValue()) << std::endl;
     report << "getConfiguredMouseHighlighterEnabledValue: " << gpo_rule_configured_to_string(powertoys_gpo::getConfiguredMouseHighlighterEnabledValue()) << std::endl;
+    report << "getConfiguredMouseJumpEnabledValue: " << gpo_rule_configured_to_string(powertoys_gpo::getConfiguredMouseJumpEnabledValue()) << std::endl;
     report << "getConfiguredMousePointerCrosshairsEnabledValue: " << gpo_rule_configured_to_string(powertoys_gpo::getConfiguredMousePointerCrosshairsEnabledValue()) << std::endl;
+    report << "getConfiguredMouseWithoutBordersEnabledValue: " << gpo_rule_configured_to_string(powertoys_gpo::getConfiguredMouseWithoutBordersEnabledValue()) << std::endl;
     report << "getConfiguredPowerRenameEnabledValue: " << gpo_rule_configured_to_string(powertoys_gpo::getConfiguredPowerRenameEnabledValue()) << std::endl;
     report << "getConfiguredPowerLauncherEnabledValue: " << gpo_rule_configured_to_string(powertoys_gpo::getConfiguredPowerLauncherEnabledValue()) << std::endl;
     report << "getConfiguredQuickAccentEnabledValue: " << gpo_rule_configured_to_string(powertoys_gpo::getConfiguredQuickAccentEnabledValue()) << std::endl;
     report << "getConfiguredScreenRulerEnabledValue: " << gpo_rule_configured_to_string(powertoys_gpo::getConfiguredScreenRulerEnabledValue()) << std::endl;
     report << "getConfiguredShortcutGuideEnabledValue: " << gpo_rule_configured_to_string(powertoys_gpo::getConfiguredShortcutGuideEnabledValue()) << std::endl;
     report << "getConfiguredTextExtractorEnabledValue: " << gpo_rule_configured_to_string(powertoys_gpo::getConfiguredTextExtractorEnabledValue()) << std::endl;
+    report << "getConfiguredPeekEnabledValue: " << gpo_rule_configured_to_string(powertoys_gpo::getConfiguredPeekEnabledValue()) << std::endl;
     report << "getConfiguredVideoConferenceMuteEnabledValue: " << gpo_rule_configured_to_string(powertoys_gpo::getConfiguredVideoConferenceMuteEnabledValue()) << std::endl;
-
+    report << "getDisableAutomaticUpdateDownloadValue: " << gpo_rule_configured_to_string(powertoys_gpo::getDisableAutomaticUpdateDownloadValue()) << std::endl;
+    report << "getSuspendNewUpdateToastValue: " << gpo_rule_configured_to_string(powertoys_gpo::getSuspendNewUpdateToastValue()) << std::endl;
+    report << "getDisableNewUpdateToastValue: " << gpo_rule_configured_to_string(powertoys_gpo::getDisableNewUpdateToastValue()) << std::endl;
+    report << "getDisableShowWhatsNewAfterUpdatesValue: " << gpo_rule_configured_to_string(powertoys_gpo::getDisableShowWhatsNewAfterUpdatesValue()) << std::endl;
+    report << "getAllowExperimentationValue: " << gpo_rule_configured_to_string(powertoys_gpo::getAllowExperimentationValue()) << std::endl;
+    report << "getConfiguredQoiPreviewEnabledValue: " << gpo_rule_configured_to_string(powertoys_gpo::getConfiguredQoiPreviewEnabledValue()) << std::endl;
+    report << "getConfiguredQoiThumbnailsEnabledValue: " << gpo_rule_configured_to_string(powertoys_gpo::getConfiguredQoiThumbnailsEnabledValue()) << std::endl;
+    report << "getAllowedAdvancedPasteOnlineAIModelsValue: " << gpo_rule_configured_to_string(powertoys_gpo::getAllowedAdvancedPasteOnlineAIModelsValue()) << std::endl;
 }

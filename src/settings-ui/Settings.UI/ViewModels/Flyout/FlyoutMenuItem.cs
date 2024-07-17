@@ -5,7 +5,7 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Microsoft.UI.Xaml;
+using ManagedCommon;
 
 namespace Microsoft.PowerToys.Settings.UI.ViewModels
 {
@@ -20,7 +20,9 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
         public string ToolTip { get; set; }
 
-        public string Tag { get; set; }
+        public ModuleType Tag { get; set; }
+
+        public bool IsLocked { get; set; }
 
         public bool IsEnabled
         {
@@ -36,7 +38,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             }
         }
 
-        public Action<FlyoutMenuItem> EnabledChangedCallback { get; set; } = null;
+        public Action<FlyoutMenuItem> EnabledChangedCallback { get; set; }
 
         public bool Visible
         {

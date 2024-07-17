@@ -20,7 +20,6 @@
 
 #include <common/version/version.h>
 
-
 using namespace System;
 using namespace System::Runtime::InteropServices;
 using System::Collections::Generic::List;
@@ -40,11 +39,17 @@ public
             delete _map;
         }
 
-        String ^ GetKeyName(DWORD key) {
+        String ^ GetKeyName(DWORD key) 
+        {
             return gcnew String(_map->GetKeyName(key).c_str());
         }
 
-            void Updatelayout()
+        DWORD GetKeyValue(String ^ name)
+        {
+            return _map->GetKeyFromName(msclr::interop::marshal_as<std::wstring>(name));
+        }
+
+        void Updatelayout()
         {
             _map->UpdateLayout();
         }
@@ -129,13 +134,13 @@ public
         }
 
         static List<String ^> ^ GetAllActiveMicrophoneDeviceNames() {
-            auto names = gcnew List<String ^>();
-            for (const auto& device : MicrophoneDevice::getAllActive())
-            {
-                names->Add(gcnew String(device->name().data()));
+                auto names = gcnew List<String ^>();
+                for (const auto& device : MicrophoneDevice::getAllActive())
+                {
+                    names->Add(gcnew String(device->name().data()));
+                }
+                return names;
             }
-            return names;
-        }
 
             static List<String ^> ^
             GetAllVideoCaptureDeviceNames() {
@@ -188,7 +193,7 @@ public
         }
 
         static String ^ FZEToggleEvent() {
-          return gcnew String(CommonSharedConstants::FANCY_ZONES_EDITOR_TOGGLE_EVENT);
+            return gcnew String(CommonSharedConstants::FANCY_ZONES_EDITOR_TOGGLE_EVENT);
         }
 
         static String ^ ColorPickerSendSettingsTelemetryEvent() {
@@ -199,14 +204,34 @@ public
             return gcnew String(CommonSharedConstants::SHOW_COLOR_PICKER_SHARED_EVENT);
         }
 
+        static String ^ ShowAdvancedPasteSharedEvent() {
+            return gcnew String(CommonSharedConstants::SHOW_ADVANCED_PASTE_SHARED_EVENT);
+        }
+
+        static String ^ AdvancedPasteMarkdownEvent() {
+            return gcnew String(CommonSharedConstants::ADVANCED_PASTE_MARKDOWN_EVENT);
+        }
+
+        static String ^ AdvancedPasteJsonEvent() {
+            return gcnew String(CommonSharedConstants::ADVANCED_PASTE_JSON_EVENT);
+        }
+
         static String ^ ShowPowerOCRSharedEvent() {
             return gcnew String(CommonSharedConstants::SHOW_POWEROCR_SHARED_EVENT);
+        }
+
+        static String ^ MouseJumpShowPreviewEvent() {
+            return gcnew String(CommonSharedConstants::MOUSE_JUMP_SHOW_PREVIEW_EVENT);
         }
 
         static String ^ AwakeExitEvent() {
             return gcnew String(CommonSharedConstants::AWAKE_EXIT_EVENT);
         }
 
+        static String^ ShowPeekEvent() {
+            return gcnew String(CommonSharedConstants::SHOW_PEEK_SHARED_EVENT);
+        }
+        
         static String ^ PowerAccentExitEvent() {
             return gcnew String(CommonSharedConstants::POWERACCENT_EXIT_EVENT);
         }
@@ -215,12 +240,20 @@ public
             return gcnew String(CommonSharedConstants::SHORTCUT_GUIDE_TRIGGER_EVENT);
         }
 
-        static String
-            ^ MeasureToolTriggerEvent() {
+        static String ^ RegistryPreviewTriggerEvent() {
+                  return gcnew String(CommonSharedConstants::REGISTRY_PREVIEW_TRIGGER_EVENT);
+        }
+
+        static String ^ MeasureToolTriggerEvent() {
                   return gcnew String(CommonSharedConstants::MEASURE_TOOL_TRIGGER_EVENT);
-              }
+        }
+
         static String ^ GcodePreviewResizeEvent() {
             return gcnew String(CommonSharedConstants::GCODE_PREVIEW_RESIZE_EVENT);
+        }
+
+        static String ^ QoiPreviewResizeEvent() {
+            return gcnew String(CommonSharedConstants::QOI_PREVIEW_RESIZE_EVENT);
         }
 
         static String ^ DevFilesPreviewResizeEvent() {
@@ -237,6 +270,30 @@ public
 
         static String ^ SvgPreviewResizeEvent() {
             return gcnew String(CommonSharedConstants::SVG_PREVIEW_RESIZE_EVENT);
+        }
+
+        static String ^ ShowHostsSharedEvent() {
+            return gcnew String(CommonSharedConstants::SHOW_HOSTS_EVENT);
+        }
+
+        static String ^ ShowHostsAdminSharedEvent() {
+            return gcnew String(CommonSharedConstants::SHOW_HOSTS_ADMIN_EVENT);
+        }
+
+        static String ^ CropAndLockThumbnailEvent() {
+            return gcnew String(CommonSharedConstants::CROP_AND_LOCK_THUMBNAIL_EVENT);
+        }
+
+        static String ^ CropAndLockReparentEvent() {
+            return gcnew String(CommonSharedConstants::CROP_AND_LOCK_REPARENT_EVENT);
+        }
+
+        static String ^ ShowEnvironmentVariablesSharedEvent() {
+            return gcnew String(CommonSharedConstants::SHOW_ENVIRONMENT_VARIABLES_EVENT);
+        }
+
+        static String ^ ShowEnvironmentVariablesAdminSharedEvent() {
+            return gcnew String(CommonSharedConstants::SHOW_ENVIRONMENT_VARIABLES_ADMIN_EVENT);
         }
     };
 }

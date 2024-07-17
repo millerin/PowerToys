@@ -29,19 +29,13 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         {
             SettingsUtils = settingsUtils;
 
-            if (settingsRepository == null)
-            {
-                throw new ArgumentNullException(nameof(settingsRepository));
-            }
+            ArgumentNullException.ThrowIfNull(settingsRepository);
 
             GeneralSettingsConfig = settingsRepository.SettingsConfig;
 
             InitializeEnabledValue();
 
-            if (measureToolSettingsRepository == null)
-            {
-                throw new ArgumentNullException(nameof(measureToolSettingsRepository));
-            }
+            ArgumentNullException.ThrowIfNull(measureToolSettingsRepository);
 
             Settings = measureToolSettingsRepository.SettingsConfig;
 
@@ -209,7 +203,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             {
                 if (Settings.Properties.ActivationShortcut != value)
                 {
-                    Settings.Properties.ActivationShortcut = value;
+                    Settings.Properties.ActivationShortcut = value ?? Settings.Properties.DefaultActivationShortcut;
 
                     NotifyPropertyChanged();
 
@@ -219,6 +213,23 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                          "{{ \"powertoys\": {{ \"{0}\": {1} }} }}",
                          MeasureToolSettings.ModuleName,
                          JsonSerializer.Serialize(Settings)));
+                }
+            }
+        }
+
+        public int DefaultMeasureStyle
+        {
+            get
+            {
+                return Settings.Properties.DefaultMeasureStyle.Value;
+            }
+
+            set
+            {
+                if (Settings.Properties.DefaultMeasureStyle.Value != value)
+                {
+                    Settings.Properties.DefaultMeasureStyle.Value = value;
+                    NotifyPropertyChanged();
                 }
             }
         }

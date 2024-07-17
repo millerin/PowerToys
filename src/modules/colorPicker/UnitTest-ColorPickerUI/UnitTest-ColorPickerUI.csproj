@@ -2,7 +2,9 @@
   <Import Project="..\..\..\Version.props" />
 
   <PropertyGroup>
-    <TargetFramework>net7.0-windows10.0.19041.0</TargetFramework>
+    <TargetFramework>net8.0-windows10.0.20348.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
     <ProjectGuid>{090CD7B7-3B0C-4D1D-BC98-83EB5D799BC1}</ProjectGuid>
     <RootNamespace>Microsoft.ColorPicker.UnitTests</RootNamespace>
     <IsPackable>false</IsPackable>
@@ -12,7 +14,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <OutputPath>..\..\..\..\$(Platform)\$(Configuration)\modules\ColorPicker\UnitTest-ColorPickerUI\</OutputPath>
+    <OutputPath>..\..\..\..\$(Platform)\$(Configuration)\tests\UnitTest-ColorPickerUI\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,6 +22,14 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="MSTest.TestAdapter" />
     <PackageReference Include="MSTest.TestFramework" />
+    <PackageReference Include="Microsoft.Win32.SystemEvents">
+      <!-- This package is a dependency of System.Drawing.Common, but we need to set it here so we can exclude the assets, so it doesn't conflict with the 8.0.1 dll coming from .NET SDK. -->
+      <ExcludeAssets>runtime</ExcludeAssets> <!-- Should already be present on .net sdk runtime, so we avoid the conflicting runtime version from nuget -->
+    </PackageReference>
+    <PackageReference Include="System.CodeDom">
+      <!-- This package is a dependency of System.Management, but we need to set it here so we can exclude the assets, so it doesn't conflict with the 8.0.1 dll coming from .NET SDK. -->
+      <ExcludeAssets>runtime</ExcludeAssets> <!-- Should already be present on .net sdk runtime, so we avoid the conflicting runtime version from nuget -->
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

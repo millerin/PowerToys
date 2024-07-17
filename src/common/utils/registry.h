@@ -16,6 +16,86 @@
 
 namespace registry
 {
+    namespace install_scope
+    {
+        const wchar_t INSTALL_SCOPE_REG_KEY[] = L"Software\\Classes\\powertoys\\";
+
+        enum class InstallScope
+        {
+            PerMachine = 0,
+            PerUser,
+        };
+
+        inline const InstallScope get_current_install_scope()
+        {
+            // Open HKLM key
+            HKEY perMachineKey{};
+            if (RegOpenKeyExW(HKEY_LOCAL_MACHINE,
+                              INSTALL_SCOPE_REG_KEY,
+                              0,
+                              KEY_READ,
+                              &perMachineKey) != ERROR_SUCCESS)
+            {
+                // Open HKCU key
+                HKEY perUserKey{};
+                if (RegOpenKeyExW(HKEY_CURRENT_USER,
+                                  INSTALL_SCOPE_REG_KEY,
+                                  0,
+                                  KEY_READ,
+                                  &perUserKey) != ERROR_SUCCESS)
+                {
+                    // both keys are missing
+                    return InstallScope::PerMachine;
+                }
+                else
+                {
+                    DWORD dataSize{};
+                    if (RegGetValueW(
+                        perUserKey,
+                        nullptr,
+                        L"InstallScope",
+                        RRF_RT_REG_SZ,
+                        nullptr,
+                        nullptr,
+                        &dataSize) != ERROR_SUCCESS)
+                    {
+                        // HKCU key is missing
+                        RegCloseKey(perUserKey);
+                        return InstallScope::PerMachine;
+                    }
+
+                    std::wstring data;
+                    data.resize(dataSize / sizeof(wchar_t));
+
+                    if (RegGetValueW(
+                            perUserKey,
+                            nullptr,
+                            L"InstallScope",
+                            RRF_RT_REG_SZ,
+                            nullptr,
+                            &data[0],
+                            &dataSize) != ERROR_SUCCESS)
+                    {
+                        // HKCU key is missing
+                        RegCloseKey(perUserKey);
+                        return InstallScope::PerMachine;
+                    }
+                    RegCloseKey(perUserKey);
+
+                    if (data.contains(L"perUser"))
+                    {
+                        return InstallScope::PerUser;
+                    }
+                }
+            }
+
+            return InstallScope::PerMachine;
+        }
+    }
+
+    template<class>
+    inline constexpr bool always_false_v = false;
+
     namespace detail
     {
         struct on_exit
@@ -26,9 +106,6 @@ namespace registry
                 f{ std::move(f) } {}
             ~on_exit() { f(); }
         };
-
-        template<class>
-        inline constexpr bool always_false_v = false;
 
         template<class... Ts>
         struct overloaded : Ts...
@@ -318,6 +395,7 @@ namespace registry
                                                           std::wstring className,
                                                           std::wstring displayName,
                                                           std::vector<std::wstring> fileTypes,
+                                                          std::wstring perceivedType = L"",
                                                           std::wstring fileKindType = L"")
         {
             const HKEY scope = perUser ? HKEY_CURRENT_USER : HKEY_LOCAL_MACHINE;
@@ -359,9 +437,8 @@ namespace registry
 
             for (const auto& fileType : fileTypes)
             {
-                std::wstring fileAssociationPath = L"Software\\Classes\\";
-                fileAssociationPath += fileType;
-                fileAssociationPath += L"\\shellex\\";
+                std::wstring fileTypePath = L"Software\\Classes\\" + fileType;
+                std::wstring fileAssociationPath = fileTypePath + L"\\shellex\\";
                 fileAssociationPath += handlerType == PreviewHandlerType::preview ? IPREVIEW_HANDLER_CLSID : ITHUMBNAIL_PROVIDER_CLSID;
                 changes.push_back({ scope, fileAssociationPath, std::nullopt, handlerClsid });
                 if (!fileKindType.empty())
@@ -370,6 +447,10 @@ namespace registry
                     // Make it optional as well so that we don't fail registering the handler if we can't write to HKEY_LOCAL_MACHINE.
                     std::wstring kindMapPath = L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\KindMap";
                     changes.push_back({ HKEY_LOCAL_MACHINE, kindMapPath, fileType, fileKindType, false});
+                }
+                if (!perceivedType.empty())
+                {
+                    changes.push_back({ scope, fileTypePath, L"PerceivedType", perceivedType });
                 }
                 if (handlerType == PreviewHandlerType::preview && fileType == L".reg")
                 {

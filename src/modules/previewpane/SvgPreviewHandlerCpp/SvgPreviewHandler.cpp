@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "SvgPreviewHandler.h"
+#include "../powerpreview/powerpreviewConstants.h"
 
 #include <shellapi.h>
 #include <Shlwapi.h>
@@ -9,6 +10,7 @@
 #include <common/logger/logger.h>
 #include <common/SettingsAPI/settings_helpers.h>
 #include <common/utils/process_path.h>
+#include <common/Themes/windows_colors.h>
 
 extern HINSTANCE g_hInst;
 extern long g_cDllRef;
@@ -127,6 +129,12 @@ IFACEMETHODIMP SvgPreviewHandler::SetRect(const RECT* prc)
     HRESULT hr = E_INVALIDARG;
     if (prc != NULL)
     {
+        if (m_rcParent.left == 0 && m_rcParent.top == 0 && m_rcParent.right == 0 && m_rcParent.bottom == 0 && (prc->left != 0 || prc->top != 0 || prc->right != 0 || prc->bottom != 0))
+        {
+            // SvgPreviewHandler position first initialisation, do the first preview
+            m_rcParent = *prc;
+            DoPreview();
+        }
         if (!m_resizeEvent)
         {
             Logger::error(L"Failed to create resize event for SvgPreviewHandler");
@@ -150,6 +158,11 @@ IFACEMETHODIMP SvgPreviewHandler::DoPreview()
 {
     try
     {
+        if (m_rcParent.left == 0 && m_rcParent.top == 0 && m_rcParent.right == 0 && m_rcParent.bottom == 0)
+        {
+            // Postponing Start SvgPreviewHandler.exe, position not yet initialized. preview will be done after initialisation
+            return S_OK;
+        }
         Logger::info(L"Starting SvgPreviewHandler.exe");
 
         STARTUPINFO info = { sizeof(info) };
@@ -198,6 +211,8 @@ IFACEMETHODIMP SvgPreviewHandler::Unload()
 
 IFACEMETHODIMP SvgPreviewHandler::SetBackgroundColor(COLORREF color)
 {
+    HBRUSH brush = CreateSolidBrush(WindowsColors::is_dark_mode() ? powerpreviewConstants::DARK_THEME_COLOR : powerpreviewConstants::LIGHT_THEME_COLOR);
+    SetClassLongPtr(m_hwndParent, GCLP_HBRBACKGROUND, reinterpret_cast<LONG_PTR>(brush));
     return S_OK;
 }
 

@@ -15,6 +15,8 @@ namespace Microsoft.PowerToys.Settings.UI.Library
     {
         private Action notifyEnabledChangedAction;
 
+        // Default values for enabled modules should match their expected "enabled by default" values.
+        // Otherwise, a run of DSC on clean settings will not match the expected default result.
         public EnabledModules()
         {
         }
@@ -55,7 +57,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
         private bool fileExplorerPreview = true;
 
         [JsonPropertyName("File Explorer Preview")]
-        public bool FileExplorerPreview
+        public bool PowerPreview
         {
             get => fileExplorerPreview;
             set
@@ -116,7 +118,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             }
         }
 
-        private bool keyboardManager = true;
+        private bool keyboardManager; // defaulting to off
 
         [JsonPropertyName("Keyboard Manager")]
         public bool KeyboardManager
@@ -166,7 +168,24 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             }
         }
 
-        private bool awake;
+        private bool cropAndLock = true;
+
+        [JsonPropertyName("CropAndLock")]
+        public bool CropAndLock
+        {
+            get => cropAndLock;
+            set
+            {
+                if (cropAndLock != value)
+                {
+                    LogTelemetryEvent(value);
+                    cropAndLock = value;
+                    NotifyChange();
+                }
+            }
+        }
+
+        private bool awake = true;
 
         [JsonPropertyName("Awake")]
         public bool Awake
@@ -178,6 +197,22 @@ namespace Microsoft.PowerToys.Settings.UI.Library
                 {
                     LogTelemetryEvent(value);
                     awake = value;
+                }
+            }
+        }
+
+        private bool mouseWithoutBorders; // defaulting to off
+
+        [JsonPropertyName("MouseWithoutBorders")]
+        public bool MouseWithoutBorders
+        {
+            get => mouseWithoutBorders;
+            set
+            {
+                if (mouseWithoutBorders != value)
+                {
+                    LogTelemetryEvent(value);
+                    mouseWithoutBorders = value;
                 }
             }
         }
@@ -214,6 +249,22 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             }
         }
 
+        private bool mouseJump; // defaulting to off
+
+        [JsonPropertyName("MouseJump")]
+        public bool MouseJump
+        {
+            get => mouseJump;
+            set
+            {
+                if (mouseJump != value)
+                {
+                    LogTelemetryEvent(value);
+                    mouseJump = value;
+                }
+            }
+        }
+
         private bool alwaysOnTop = true;
 
         [JsonPropertyName("AlwaysOnTop")]
@@ -230,7 +281,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             }
         }
 
-        private bool mousePointerCrosshairs = true;
+        private bool mousePointerCrosshairs; // defaulting to off
 
         [JsonPropertyName("MousePointerCrosshairs")]
         public bool MousePointerCrosshairs
@@ -246,7 +297,7 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             }
         }
 
-        private bool powerAccent;
+        private bool powerAccent; // defaulting to off
 
         [JsonPropertyName("QuickAccent")]
         public bool PowerAccent
@@ -262,10 +313,10 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             }
         }
 
-        private bool powerOCR = true;
+        private bool powerOCR; // defaulting to off
 
         [JsonPropertyName("TextExtractor")]
-        public bool PowerOCR
+        public bool PowerOcr
         {
             get => powerOCR;
             set
@@ -274,6 +325,23 @@ namespace Microsoft.PowerToys.Settings.UI.Library
                 {
                     LogTelemetryEvent(value);
                     powerOCR = value;
+                    NotifyChange();
+                }
+            }
+        }
+
+        private bool advancedPaste = true;
+
+        [JsonPropertyName("AdvancedPaste")]
+        public bool AdvancedPaste
+        {
+            get => advancedPaste;
+            set
+            {
+                if (advancedPaste != value)
+                {
+                    LogTelemetryEvent(value);
+                    advancedPaste = value;
                     NotifyChange();
                 }
             }
@@ -325,6 +393,71 @@ namespace Microsoft.PowerToys.Settings.UI.Library
                 {
                     LogTelemetryEvent(value);
                     fileLocksmith = value;
+                }
+            }
+        }
+
+        private bool peek = true;
+
+        [JsonPropertyName("Peek")]
+        public bool Peek
+        {
+            get => peek;
+            set
+            {
+                if (peek != value)
+                {
+                    LogTelemetryEvent(value);
+                    peek = value;
+                }
+            }
+        }
+
+        private bool registryPreview = true;
+
+        [JsonPropertyName("RegistryPreview")]
+        public bool RegistryPreview
+        {
+            get => registryPreview;
+            set
+            {
+                if (registryPreview != value)
+                {
+                    LogTelemetryEvent(value);
+                    registryPreview = value;
+                }
+            }
+        }
+
+        private bool cmdNotFound = true;
+
+        [JsonPropertyName("CmdNotFound")]
+        public bool CmdNotFound
+        {
+            get => cmdNotFound;
+            set
+            {
+                if (cmdNotFound != value)
+                {
+                    LogTelemetryEvent(value);
+                    cmdNotFound = value;
+                    NotifyChange();
+                }
+            }
+        }
+
+        private bool environmentVariables = true;
+
+        [JsonPropertyName("EnvironmentVariables")]
+        public bool EnvironmentVariables
+        {
+            get => environmentVariables;
+            set
+            {
+                if (environmentVariables != value)
+                {
+                    LogTelemetryEvent(value);
+                    environmentVariables = value;
                 }
             }
         }

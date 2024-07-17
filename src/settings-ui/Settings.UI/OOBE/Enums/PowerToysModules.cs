@@ -7,15 +7,21 @@ namespace Microsoft.PowerToys.Settings.UI.OOBE.Enums
     public enum PowerToysModules
     {
         Overview = 0,
+        AdvancedPaste,
         AlwaysOnTop,
         Awake,
+        CmdNotFound,
         ColorPicker,
+        CropAndLock,
+        EnvironmentVariables,
         FancyZones,
         FileLocksmith,
         FileExplorer,
         ImageResizer,
         KBM,
         MouseUtils,
+        MouseWithoutBorders,
+        Peek,
         PowerRename,
         Run,
         QuickAccent,
@@ -25,5 +31,6 @@ namespace Microsoft.PowerToys.Settings.UI.OOBE.Enums
         MeasureTool,
         Hosts,
         WhatsNew,
+        RegistryPreview,
     }
 }

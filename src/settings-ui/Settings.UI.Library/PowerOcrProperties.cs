@@ -3,14 +3,18 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Text.Json;
+using Settings.UI.Library.Attributes;
 
 namespace Microsoft.PowerToys.Settings.UI.Library
 {
     public class PowerOcrProperties
     {
+        [CmdConfigureIgnore]
+        public HotkeySettings DefaultActivationShortcut => new HotkeySettings(true, false, false, true, 0x54); // Win+Shift+T
+
         public PowerOcrProperties()
         {
-            ActivationShortcut = new HotkeySettings(true, false, false, true, 0x54); // Win+Shift+T
+            ActivationShortcut = DefaultActivationShortcut;
             PreferredLanguage = string.Empty;
         }
 

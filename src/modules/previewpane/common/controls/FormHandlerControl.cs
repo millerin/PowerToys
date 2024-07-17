@@ -73,9 +73,9 @@ namespace Common
         }
 
         /// <inheritdoc />
-        public void SetRect(Rectangle rect)
+        public void SetRect(Rectangle windowBounds)
         {
-            this.UpdateWindowBounds(parentHwnd);
+            this.UpdateWindowBounds(parentHwnd, windowBounds);
         }
 
         /// <inheritdoc />
@@ -88,7 +88,7 @@ namespace Common
         public void SetWindow(IntPtr hwnd, Rectangle rect)
         {
             this.parentHwnd = hwnd;
-            this.UpdateWindowBounds(hwnd);
+            this.UpdateWindowBounds(hwnd, rect);
         }
 
         /// <inheritdoc />
@@ -118,8 +118,14 @@ namespace Common
         /// <summary>
         /// Update the Form Control window with the passed rectangle.
         /// </summary>
-        public void UpdateWindowBounds(IntPtr hwnd)
+        public void UpdateWindowBounds(IntPtr hwnd, Rectangle newBounds)
         {
+            if (this.Disposing || this.IsDisposed)
+            {
+                // For unclear reasons, this can be called when handling an error and the form has already been disposed.
+                return;
+            }
+
             // We must set the WS_CHILD style to change the form to a control within the Explorer preview pane
             int windowStyle = NativeMethods.GetWindowLong(Handle, gwlStyle);
             if ((windowStyle & wsChild) == 0)
@@ -129,12 +135,16 @@ namespace Common
 
             NativeMethods.SetParent(Handle, hwnd);
 
-            RECT s = default(RECT);
-            NativeMethods.GetClientRect(hwnd, ref s);
-
-            if (Bounds.Right != s.Right || Bounds.Bottom != s.Bottom || Bounds.Left != s.Left || Bounds.Top != s.Top)
+            if (newBounds.IsEmpty)
             {
-                Bounds = s.ToRectangle();
+                RECT s = default(RECT);
+                NativeMethods.GetClientRect(hwnd, ref s);
+                newBounds = new Rectangle(s.Left, s.Top, s.Right - s.Left, s.Bottom - s.Top);
+            }
+
+            if (Bounds.Right != newBounds.Right || Bounds.Bottom != newBounds.Bottom || Bounds.Left != newBounds.Left || Bounds.Top != newBounds.Top)
+            {
+                Bounds = newBounds;
             }
         }
     }

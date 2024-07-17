@@ -5,8 +5,7 @@
 using System;
 using System.Threading;
 using System.Windows;
-using Common.UI;
-using PowerAccent.Core.Tools;
+using ManagedCommon;
 
 namespace PowerAccent.UI
 {
@@ -17,7 +16,6 @@ namespace PowerAccent.UI
     {
         private static Mutex _mutex;
         private bool _disposed;
-        private ThemeManager _themeManager;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -29,7 +27,6 @@ namespace PowerAccent.UI
                 Application.Current.Shutdown();
             }
 
-            _themeManager = new ThemeManager(this);
             base.OnStartup(e);
         }
 
@@ -49,7 +46,6 @@ namespace PowerAccent.UI
             if (disposing)
             {
                 _mutex?.Dispose();
-                _themeManager?.Dispose();
             }
 
             _disposed = true;

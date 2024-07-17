@@ -12,9 +12,17 @@ namespace winrt::PowerToys::GPOWrapper::implementation
     {
         return static_cast<GpoRuleConfigured>(powertoys_gpo::getConfiguredAwakeEnabledValue());
     }
+    GpoRuleConfigured GPOWrapper::GetConfiguredCmdNotFoundEnabledValue()
+    {
+        return static_cast<GpoRuleConfigured>(powertoys_gpo::getConfiguredCmdNotFoundEnabledValue());
+    }
     GpoRuleConfigured GPOWrapper::GetConfiguredColorPickerEnabledValue()
     {
         return static_cast<GpoRuleConfigured>(powertoys_gpo::getConfiguredColorPickerEnabledValue());
+    }
+    GpoRuleConfigured GPOWrapper::GetConfiguredCropAndLockEnabledValue()
+    {
+        return static_cast<GpoRuleConfigured>(powertoys_gpo::getConfiguredCropAndLockEnabledValue());
     }
     GpoRuleConfigured GPOWrapper::GetConfiguredFancyZonesEnabledValue()
     {
@@ -80,6 +88,10 @@ namespace winrt::PowerToys::GPOWrapper::implementation
     {
         return static_cast<GpoRuleConfigured>(powertoys_gpo::getConfiguredMouseHighlighterEnabledValue());
     }
+    GpoRuleConfigured GPOWrapper::GetConfiguredMouseJumpEnabledValue()
+    {
+        return static_cast<GpoRuleConfigured>(powertoys_gpo::getConfiguredMouseJumpEnabledValue());
+    }
     GpoRuleConfigured GPOWrapper::GetConfiguredMousePointerCrosshairsEnabledValue()
     {
         return static_cast<GpoRuleConfigured>(powertoys_gpo::getConfiguredMousePointerCrosshairsEnabledValue());
@@ -96,6 +108,10 @@ namespace winrt::PowerToys::GPOWrapper::implementation
     {
         return static_cast<GpoRuleConfigured>(powertoys_gpo::getConfiguredQuickAccentEnabledValue());
     }
+    GpoRuleConfigured GPOWrapper::GetConfiguredRegistryPreviewEnabledValue()
+    {
+        return static_cast<GpoRuleConfigured>(powertoys_gpo::getConfiguredRegistryPreviewEnabledValue());
+    }
     GpoRuleConfigured GPOWrapper::GetConfiguredScreenRulerEnabledValue()
     {
         return static_cast<GpoRuleConfigured>(powertoys_gpo::getConfiguredScreenRulerEnabledValue());
@@ -108,24 +124,36 @@ namespace winrt::PowerToys::GPOWrapper::implementation
     {
         return static_cast<GpoRuleConfigured>(powertoys_gpo::getConfiguredTextExtractorEnabledValue());
     }
+    GpoRuleConfigured GPOWrapper::GetConfiguredAdvancedPasteEnabledValue()
+    {
+        return static_cast<GpoRuleConfigured>(powertoys_gpo::getConfiguredAdvancedPasteEnabledValue());
+    }
     GpoRuleConfigured GPOWrapper::GetConfiguredVideoConferenceMuteEnabledValue()
     {
         return static_cast<GpoRuleConfigured>(powertoys_gpo::getConfiguredVideoConferenceMuteEnabledValue());
     }
-    GpoRuleConfigured GPOWrapper::GetDisableAutomaticUpdateDownloadValue()
-    {
-        return static_cast<GpoRuleConfigured>(powertoys_gpo::getDisableAutomaticUpdateDownloadValue());
-    }
-    GpoRuleConfigured GPOWrapper::GetSuspendNewUpdateToastValue()
-    {
-        return static_cast<GpoRuleConfigured>(powertoys_gpo::getSuspendNewUpdateToastValue());
-    }
-    GpoRuleConfigured GPOWrapper::GetDisablePeriodicUpdateCheckValue()
-    {
-        return static_cast<GpoRuleConfigured>(powertoys_gpo::getDisablePeriodicUpdateCheckValue());
-    }
     GpoRuleConfigured GPOWrapper::GetAllowExperimentationValue()
     {
         return static_cast<GpoRuleConfigured>(powertoys_gpo::getAllowExperimentationValue());
+    }
+    GpoRuleConfigured GPOWrapper::GetRunPluginEnabledValue(winrt::hstring const& pluginID)
+    {
+        return static_cast<GpoRuleConfigured>(powertoys_gpo::getRunPluginEnabledValue(winrt::to_string(pluginID)));
+    }
+    GpoRuleConfigured GPOWrapper::GetConfiguredEnvironmentVariablesEnabledValue()
+    {
+        return static_cast<GpoRuleConfigured>(powertoys_gpo::getConfiguredEnvironmentVariablesEnabledValue());
+    }
+    GpoRuleConfigured GPOWrapper::GetConfiguredQoiPreviewEnabledValue()
+    {
+        return static_cast<GpoRuleConfigured>(powertoys_gpo::getConfiguredQoiPreviewEnabledValue());
+    }
+    GpoRuleConfigured GPOWrapper::GetConfiguredQoiThumbnailsEnabledValue()
+    {
+        return static_cast<GpoRuleConfigured>(powertoys_gpo::getConfiguredQoiThumbnailsEnabledValue());
+    }
+    GpoRuleConfigured GPOWrapper::GetAllowedAdvancedPasteOnlineAIModelsValue()
+    {
+        return static_cast<GpoRuleConfigured>(powertoys_gpo::getAllowedAdvancedPasteOnlineAIModelsValue());
     }
 }
