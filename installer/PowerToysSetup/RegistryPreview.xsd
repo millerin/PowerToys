@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="http://schemas.microsoft.com/wix/2006/wi">
+  <xs:element name="Wix">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Fragment">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="DirectoryRef" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence minOccurs="0">
+                    <xs:element name="Directory" minOccurs="0">
+                      <xs:complexType>
+                        <xs:attribute name="Id" use="required" />
+                        <xs:attribute name="Name" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="Id" use="required" />
+                  <xs:attribute name="FileSource" />
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="ComponentGroup">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Component">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="RegistryKey">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="RegistryValue">
+                                  <xs:complexType>
+                                    <xs:attribute name="Type" use="required" />
+                                    <xs:attribute name="Name" use="required" />
+                                    <xs:attribute name="Value" use="required" />
+                                    <xs:attribute name="KeyPath" use="required" />
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                              <xs:attribute name="Root" use="required" />
+                              <xs:attribute name="Key" use="required" />
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="RemoveFolder">
+                            <xs:complexType>
+                              <xs:attribute name="Id" use="required" />
+                              <xs:attribute name="Directory" use="required" />
+                              <xs:attribute name="On" use="required" />
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                        <xs:attribute name="Id" use="required" />
+                        <xs:attribute name="Guid" use="required" />
+                        <xs:attribute name="Directory" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="Id" use="required" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
